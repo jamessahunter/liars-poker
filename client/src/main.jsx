@@ -6,6 +6,8 @@ import Home from './pages/Home';
 import Matchup from './pages/Matchup';
 import Vote from './pages/Vote';
 import NotFound from './pages/NotFound';
+import Game from './pages/Game.jsx';
+import Lobby from './pages/Lobby.jsx';
 
 const router = createBrowserRouter([
   {
@@ -20,8 +22,11 @@ const router = createBrowserRouter([
         path: '/matchup',
         element: <Matchup />
       }, {
-        path: '/matchup/:id',
-        element: <Vote />
+        path: '/game/:id',
+        element: <Game />
+      }, {
+        path: '/lobby',
+        element: <Lobby />
       },
     ],
   },
