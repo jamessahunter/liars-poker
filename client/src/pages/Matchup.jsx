@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAllTech, createMatchup } from '../utils/api';
+import { createMatchup } from '../utils/api';
 
 // Uncomment import statements below after building queries and mutations
 // import { useMutation, useQuery } from '@apollo/client';
@@ -15,21 +15,21 @@ const Matchup = () => {
   });
   let navigate = useNavigate();
 
-  useEffect(() => {
-    const getTechList = async () => {
-      try {
-        const res = await getAllTech();
-        if (!res.ok) {
-          throw new Error('No list of technologies');
-        }
-        const techList = await res.json();
-        setTechList(techList);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    getTechList();
-  }, []);
+  // useEffect(() => {
+  //   const getTechList = async () => {
+  //     try {
+  //       const res = await getAllTech();
+  //       if (!res.ok) {
+  //         throw new Error('No list of technologies');
+  //       }
+  //       const techList = await res.json();
+  //       setTechList(techList);
+  //     } catch (err) {
+  //       console.error(err);
+  //     }
+  //   };
+  //   getTechList();
+  // }, []);
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;

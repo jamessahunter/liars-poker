@@ -36,11 +36,24 @@ export const createVote = (voteData) => {
   });
 };
 
-export const getAllTech = () => {
-  return fetch('/api/tech', {
+export const getAllUser = () => {
+  return fetch('/api/user', {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
     },
   });
 };
+
+
+export const createUser = (username) => {
+  console.log(username)
+  console.log(JSON.stringify(username))
+  return fetch(`/api/user`,{
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: `{"username" : "${username}"}`,
+  })
+}

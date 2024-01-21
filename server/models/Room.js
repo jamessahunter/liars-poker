@@ -1,5 +1,5 @@
 const { Schema, model } = require('mongoose');
-const User = require('./User');
+// const userSchema = require('./User');
 
 const roomSchema = new Schema({
   room: {
@@ -10,7 +10,10 @@ const roomSchema = new Schema({
   cards_delt:{
     type: String,
   },
-  users: [User]
+  users: [{
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+  }],
   
 });
 

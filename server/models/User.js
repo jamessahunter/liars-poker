@@ -7,7 +7,6 @@ const userSchema = new Schema({
   },
   cards: {
     type: String,
-    required: true,
   },
   card_count: {
     type: Number,

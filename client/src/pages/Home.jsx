@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import { getAllMatchups } from '../utils/api';
+import { createUser, getAllMatchups } from '../utils/api';
 import UserHand from './UserHand';
 import Lobby from './Lobby';
 
@@ -15,15 +15,24 @@ const Home = () => {
   const handleButtonClick = async (event) => {
     event.preventDefault();
   // Get the id of the clicked button
-  // console.log( event.currentTarget.id)
   const buttonId = event.target.id;
-    // console.log('test')
-    // console.log(buttonId)
+
   // Check which button was clicked
   if (buttonId === 'create') {
     // Create a game logic
+    // console.log(userFormData.username)
+    try {
+      const res = await createUser(userFormData.username)
+      if(!res.ok){
+        throw new Error('Cant create user')
+      }
+    }
+    catch (err) {
+      console.error(err);
+    }
     console.log('Create a game');
-    navigate('/lobby');
+
+    // navigate('/lobby');
   } else if (buttonId === 'room') {
     // Join a game logic
     console.log('Join a game');
