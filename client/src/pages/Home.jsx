@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import { createUser, getAllMatchups } from '../utils/api';
+import { createUser, getAllUser, createRoom, addUser } from '../utils/api';
 import UserHand from './UserHand';
 import Lobby from './Lobby';
 
@@ -27,6 +27,31 @@ const Home = () => {
         throw new Error('Cant create user')
       }
     }
+      catch (err) {
+        console.error(err);
+      }
+    let roomCode='';
+    for(let i=0;i<4;i++){
+    let randomIndex = Math.floor(Math.random() * 26);
+    // Convert the random number to a letter
+    let randomLetter = String.fromCharCode(65 + randomIndex);
+    roomCode=roomCode+randomLetter;
+    }
+    try {
+      const res = await createRoom(roomCode)
+      if(!res.ok){
+        throw new Error('Cant create room')
+      }
+    }
+    catch (err) {
+      console.error(err);
+    }
+    try {
+      const res = await addUser(userFormData.username,roomCode)
+      if(!res.ok){
+        throw new Error('Cant add user room')
+      }
+    }
     catch (err) {
       console.error(err);
     }
@@ -35,6 +60,16 @@ const Home = () => {
     // navigate('/lobby');
   } else if (buttonId === 'room') {
     // Join a game logic
+    try {
+      const res = await getAllUser(userFormData.room)
+      if(!res.ok){
+        throw new Error('Cant get users')
+      }
+      console.log(res)
+    }
+    catch (err) {
+      console.error(err);
+    }
     console.log('Join a game');
   }
   }

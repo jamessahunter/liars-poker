@@ -11,7 +11,7 @@ const roomSchema = new Schema({
     type: String,
   },
   users: [{
-    type: Schema.Types.ObjectId,
+    type: String,
     ref: 'User',
   }],
   
