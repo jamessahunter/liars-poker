@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import { createUser, getAllUser, createRoom, addUser } from '../utils/api';
+import { createUser, getAllUser, createRoom, addUser, AnotherUser } from '../utils/api';
 import UserHand from './UserHand';
 import Lobby from './Lobby';
+import Game from './Game';
 
 // Uncomment import statements below after building queries and mutations
 // import { useQuery } from '@apollo/client';
@@ -16,11 +17,31 @@ const Home = () => {
     event.preventDefault();
   // Get the id of the clicked button
   const buttonId = event.target.id;
-
+  let taken=false;
+  let roomCode='';
   // Check which button was clicked
   if (buttonId === 'create') {
     // Create a game logic
     // console.log(userFormData.username)
+    try {
+      const res = await getAllUser(userFormData.room)
+      if(!res.ok){
+        throw new Error('Cant get users')
+      }
+      const users = await res.json();
+      console.log(users)
+      for(let i=0;i<users.length;i++){
+        if(users[i].username===userFormData.username){
+          alert("This username is already being used in this room please select another")
+          taken=true;
+          return;
+        }
+      }
+    }catch(err){
+      console.error(err)
+    }
+    console.log(taken)
+    if(!taken){
     try {
       const res = await createUser(userFormData.username)
       if(!res.ok){
@@ -30,7 +51,7 @@ const Home = () => {
       catch (err) {
         console.error(err);
       }
-    let roomCode='';
+
     for(let i=0;i<4;i++){
     let randomIndex = Math.floor(Math.random() * 26);
     // Convert the random number to a letter
@@ -57,20 +78,43 @@ const Home = () => {
     }
     console.log('Create a game');
 
-    // navigate('/lobby');
-  } else if (buttonId === 'room') {
+    navigate('/Game');
+  }
+}
+   else if (buttonId === 'room') {
     // Join a game logic
     try {
       const res = await getAllUser(userFormData.room)
       if(!res.ok){
         throw new Error('Cant get users')
       }
-      console.log(res)
+      const users = await res.json();
+      console.log(users)
+      for(let i=0;i<users.length;i++){
+        if(users[i].username===userFormData.username){
+          alert("This username is already being used in this room please select another")
+          taken=true;
+          return;
+        }
+      }
+      if(!taken) {
+        try {
+      const res = await AnotherUser(userFormData.username,userFormData.room)
+      if(!res.ok){
+        throw new Error('Cant add user room')
+      }
+    }
+    catch (err) {
+      console.error(err);
+    }
+        navigate('/Game');
+      }
     }
     catch (err) {
       console.error(err);
     }
     console.log('Join a game');
+
   }
   }
   const handleInputChange = (event) => {
@@ -88,6 +132,7 @@ const Home = () => {
       <button type='submit'id='room' onClick={handleButtonClick}>Join a Game</button>
       </form>
       {/* <Lobby></Lobby> */}
+      {/* <Game></Game> */}
       {/* <UserHand></UserHand> */}
     </div>
   );

@@ -22,7 +22,7 @@ const router = createBrowserRouter([
         // path: '/matchup',
         // element: <Matchup />
       }, {
-        path: '/game/:id',
+        path: '/game',
         element: <Game />
       }, {
         path: '/lobby',

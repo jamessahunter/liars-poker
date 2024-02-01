@@ -3,14 +3,13 @@ const mongoose = require('mongoose');
 
 module.exports = {
     async getAllUser(req, res) {
-      console.log(req.params)
+      // console.log(req.params)
       const allUser= await Room.findOne({room: req.params.code})
-      .populate('users');
-      console.log(allUser.users)
+      // console.log(allUser.users)
       if (!allUser) {
         return res.status(400).json({ message: 'No Users found' });
       }
-      res.status(200).json(allUser);
+      return res.json(allUser.users)
     },
     async createRoom({body},res){
         console.log('room')
@@ -21,6 +20,15 @@ module.exports = {
         }
         res.status(200).json(room);
       },
+      async AnotherUser(req,res){
+        console.log("another user")
+        const room = await Room.findOneAndUpdate(
+          { room: req.params.code },
+          { $addToSet: { users: req.body.username } },
+          { new: true }
+        );
+        res.status(200).json('another User added')
+    },
       async addUser(req,res){
         // console.log(req.body)
         // console.log(req.params)
@@ -35,7 +43,7 @@ module.exports = {
           { $set: { users: userId } }
         );
         res.status(200).json('User added')
-    }
+    },
 
 
 }

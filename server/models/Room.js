@@ -10,10 +10,10 @@ const roomSchema = new Schema({
   cards_delt:{
     type: String,
   },
-  users: [{
-    type: String,
+  users: {
+    type: [String],
     ref: 'User',
-  }],
+  },
   
 });
 

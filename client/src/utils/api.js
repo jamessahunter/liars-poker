@@ -36,9 +36,9 @@ export const createVote = (voteData) => {
   });
 };
 
-export const getAllUser = (code) => {
-  console.log(code)
-  return fetch(`/api/room/${code}`, {
+export const getAllUser = () => {
+  // console.log(code)
+  return fetch(`/api/user`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -79,4 +79,14 @@ export const addUser = (username,code) => {
     },
     body: `{"username" : "${username}"}`,
   })
+}
+
+  export const AnotherUser = (username,code) => {
+    return fetch(`/api/room/${code}`,{
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: `{"username" : "${username}"}`,
+    })
 }

@@ -12,6 +12,9 @@ const userSchema = new Schema({
     type: Number,
     default: 2,
   },
+  room: {
+    type: String,
+  }
 });
 
 const User = model('User', userSchema);
