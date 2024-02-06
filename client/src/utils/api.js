@@ -46,6 +46,26 @@ export const getAllUser = () => {
   });
 };
 
+export const getUser = (username) => {
+  // console.log(code)
+  return fetch(`/api/user/${username}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+};
+
+export const addCard = (username, card) => {
+  console.log(card)
+  return fetch(`/api/user/${username}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: `{"card" : "${card}"}`,
+  })
+}
 
 export const createUser = (username) => {
   console.log(username)
@@ -90,3 +110,13 @@ export const addUser = (username,code) => {
       body: `{"username" : "${username}"}`,
     })
 }
+
+export const getRoomUser = (code) => {
+  // console.log(code)
+  return fetch(`/api/room/${code}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+};

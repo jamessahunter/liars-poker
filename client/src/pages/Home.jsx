@@ -78,7 +78,7 @@ const Home = () => {
     }
     console.log('Create a game');
 
-    navigate('/Game');
+    navigate(`/Game/${roomCode}`);
   }
 }
    else if (buttonId === 'room') {
@@ -99,6 +99,15 @@ const Home = () => {
       }
       if(!taken) {
         try {
+          const res = await createUser(userFormData.username)
+          if(!res.ok){
+            throw new Error('Cant create user')
+          }
+        }
+          catch (err) {
+            console.error(err);
+          }
+        try {
       const res = await AnotherUser(userFormData.username,userFormData.room)
       if(!res.ok){
         throw new Error('Cant add user room')
@@ -107,7 +116,7 @@ const Home = () => {
     catch (err) {
       console.error(err);
     }
-        navigate('/Game');
+        navigate(`/Game/${userFormData.room}`);
       }
     }
     catch (err) {

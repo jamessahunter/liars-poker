@@ -5,12 +5,16 @@ const userSchema = new Schema({
     type: String,
     required: true,
   },
-  cards: {
+  cards: [{
     type: String,
-  },
+  }],
   card_count: {
     type: Number,
     default: 2,
+  },
+  stillIn: {
+    type: Boolean,
+    default: true,
   },
   room: {
     type: String,

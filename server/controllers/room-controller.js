@@ -2,7 +2,7 @@ const {Room, User} = require('../models');
 const mongoose = require('mongoose');
 
 module.exports = {
-    async getAllUser(req, res) {
+    async getRoomUser(req, res) {
       // console.log(req.params)
       const allUser= await Room.findOne({room: req.params.code})
       // console.log(allUser.users)
