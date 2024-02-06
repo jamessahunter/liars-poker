@@ -5,6 +5,10 @@ import { getRoomUser, getUser, addCard } from '../utils/api';
 
 const Game = () =>{
     const [cookies, setCookie, removeCookie] = useCookies(['sessionId']);
+    const [players, setPlayers] = useState([]);
+    const [userTurn, setUserTurn] = useState();
+    const [playersIn, setPlayersIn] = useState([]);
+    const [started, setStarted] = useState(false);
     let code = window.location.toString().split('/')[
         window.location.toString().split('/').length-1
     ];
@@ -13,32 +17,42 @@ const Game = () =>{
         cards[i]=1;
     }
     // console.log(cards);
-    let players;
+    // let players;
+
+    useEffect(() => {
+        console.log(playersIn);
+      }, [playersIn]);
     let maxCards;
+    useEffect (() =>{
+        getPlayers()
+        },[players])
     const getPlayers = async () =>{
         try{
             let res=await getRoomUser(code);
-            players = await res.json();
+            let players = await res.json();
     //   console.log(players)
       if(players.length>6){
         maxCards=4;
       }else{
         maxCards=5;
       }
+      setPlayers(players)
         } catch(err){
             console.error(err)
         }
     }
-    getPlayers();
+    // getPlayers();
     const handleButtonClick = async (event) => {
         event.preventDefault();
-        // console.log(players)
+        setStarted(true)
+        // console.log(started)
         for(let i=0;i<players.length;i++){
             let res = await getUser(players[i])
             let user = await res.json()
             // console.log(user)
-            console.log(cookies.sessionId);
+            // console.log(cookies.sessionId);
             if(user.stillIn){
+                setPlayersIn((prevPlayersIn) => [...prevPlayersIn, user.username]);
                 for(let i=0;i<user.card_count;i++){
                     let randomNumber = Math.floor(Math.random() * 52);
                     while(cards[randomNumber]!==1){
@@ -46,19 +60,22 @@ const Game = () =>{
                     }
                     // console.log(cards[randomNumber])
                     addCard(user.username, randomNumber)
+                    cards[randomNumber]=0;
                 }
-
             }
 
         }
+        console.log(playersIn);
     }
 
     return (
-        <div>
+        <>
+        {!started ? (
+            <>
             <h1>{code}</h1>
             <h2>Players</h2>
             <ul>
-            {!players ? (
+                {!players ? (
                 <p>Loading...</p>
                 ) : (
                 players.map((player) => (
@@ -66,8 +83,21 @@ const Game = () =>{
                 ))
                 )}
             </ul>
-            <button type='submit'onClick={handleButtonClick} >Start Game</button>
-        </div>
+            <button type='submit' onClick={handleButtonClick}>Start Game</button>
+            </>
+        ) : (
+            <>
+            <div>started</div>
+            <>
+            {playersIn[0]===cookies.sessionId ? (
+            <p>your turn</p>
+            ) : (
+            <p>some elses turn</p>
+            )}
+            </>
+            </>
+        )}
+        </>
         
     )
         
