@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useCookies } from 'react-cookie';
 import { Link } from 'react-router-dom';
 import { createUser, getAllUser, createRoom, addUser, AnotherUser } from '../utils/api';
 import UserHand from './UserHand';
@@ -12,6 +13,7 @@ import Game from './Game';
 
 const Home = () => {
   const navigate = useNavigate();
+  const [cookies, setCookie, removeCookie] = useCookies(['sessionId']);
   const [userFormData, setUserFormData] = useState({ username: '', room: '' });
   const handleButtonClick = async (event) => {
     event.preventDefault();
@@ -29,7 +31,7 @@ const Home = () => {
         throw new Error('Cant get users')
       }
       const users = await res.json();
-      console.log(users)
+      // console.log(users)
       for(let i=0;i<users.length;i++){
         if(users[i].username===userFormData.username){
           alert("This username is already being used in this room please select another")
@@ -51,7 +53,7 @@ const Home = () => {
       catch (err) {
         console.error(err);
       }
-
+    setCookie('sessionId', `${userFormData.username}`, { path: '/' });
     for(let i=0;i<4;i++){
     let randomIndex = Math.floor(Math.random() * 26);
     // Convert the random number to a letter
@@ -77,7 +79,7 @@ const Home = () => {
       console.error(err);
     }
     console.log('Create a game');
-
+    console.log(cookies.sessionId);
     navigate(`/Game/${roomCode}`);
   }
 }
@@ -107,6 +109,7 @@ const Home = () => {
           catch (err) {
             console.error(err);
           }
+          setCookie('sessionId', `${userFormData.username}`, { path: '/' });
         try {
       const res = await AnotherUser(userFormData.username,userFormData.room)
       if(!res.ok){

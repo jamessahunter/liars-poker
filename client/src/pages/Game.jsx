@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useCookies } from 'react-cookie';
 import { getRoomUser, getUser, addCard } from '../utils/api';
 
 const Game = () =>{
+    const [cookies, setCookie, removeCookie] = useCookies(['sessionId']);
     let code = window.location.toString().split('/')[
         window.location.toString().split('/').length-1
     ];
@@ -34,7 +36,8 @@ const Game = () =>{
         for(let i=0;i<players.length;i++){
             let res = await getUser(players[i])
             let user = await res.json()
-            console.log(user)
+            // console.log(user)
+            console.log(cookies.sessionId);
             if(user.stillIn){
                 for(let i=0;i<user.card_count;i++){
                     let randomNumber = Math.floor(Math.random() * 52);
