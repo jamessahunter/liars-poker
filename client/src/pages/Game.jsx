@@ -2,11 +2,15 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 import { getRoomUser, getUser, addCard } from '../utils/api';
+import io from 'socket.io-client';
+// import { Socket } from 'socket.io';
+
 
 const Game = () =>{
+
     const [cookies, setCookie, removeCookie] = useCookies(['sessionId']);
     const [players, setPlayers] = useState([]);
-    const [userTurn, setUserTurn] = useState();
+    const [userTurn, setUserTurn] = useState(0);
     const [playersIn, setPlayersIn] = useState([]);
     const [started, setStarted] = useState(false);
     let code = window.location.toString().split('/')[
@@ -26,6 +30,9 @@ const Game = () =>{
     useEffect (() =>{
         getPlayers()
         },[players])
+    useEffect(()=>{
+        console.log(started)
+    },[started])
     const getPlayers = async () =>{
         try{
             let res=await getRoomUser(code);
@@ -66,7 +73,64 @@ const Game = () =>{
 
         }
         console.log(playersIn);
+        const message = [code, 'started'];
+        sendMessage(JSON.stringify(message));
     }
+
+    const handleNextUser = async (event) => {
+        if(userTurn+1>=playersIn.length){
+            setUserTurn(0)
+        } else {
+            setUserTurn(userTurn+1);
+        }
+        console.log(userTurn);
+
+
+    }
+
+    const [socket, setSocket] = useState(null);
+
+  useEffect(() => {
+    const ws = new WebSocket('ws://localhost:8080'); // Replace 'example.com/socket' with your server's WebSocket endpoint
+
+    ws.onopen = () => {
+      console.log('WebSocket connection established');
+    };
+
+    ws.onmessage = (event) => {
+        // console.log('messae')
+      const message = event.data;
+    //   console.log(message)
+      const parse=JSON.parse(message);
+      console.log('Received message:', parse);
+      if(parse[1]==='started'){
+        setStarted(true);
+      }
+    };
+
+    ws.onclose = () => {
+      console.log('WebSocket connection closed');
+    };
+
+    setSocket(ws);
+
+    // Clean up the WebSocket connection on component unmount
+    return () => {
+      ws.close();
+    };
+  }, []);
+
+  // Send messages to the server
+  const sendMessage = (message) => {
+    // console.log('started')
+    if (socket) {
+      socket.send(message);
+    }
+  };
+
+
+
+
 
     return (
         <>
@@ -88,8 +152,9 @@ const Game = () =>{
         ) : (
             <>
             <div>started</div>
+            <button type='submit' onClick={handleNextUser}>Next User</button>
             <>
-            {playersIn[0]===cookies.sessionId ? (
+            {playersIn[userTurn]===cookies.sessionId ? (
             <p>your turn</p>
             ) : (
             <p>some elses turn</p>

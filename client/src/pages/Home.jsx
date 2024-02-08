@@ -26,7 +26,7 @@ const Home = () => {
     // Create a game logic
     // console.log(userFormData.username)
     try {
-      const res = await getAllUser(userFormData.room)
+      const res = await getAllUser(userFormData.room.toUpperCase())
       if(!res.ok){
         throw new Error('Cant get users')
       }
@@ -86,7 +86,7 @@ const Home = () => {
    else if (buttonId === 'room') {
     // Join a game logic
     try {
-      const res = await getAllUser(userFormData.room)
+      const res = await getAllUser(userFormData.room.toUpperCase())
       if(!res.ok){
         throw new Error('Cant get users')
       }
@@ -111,7 +111,7 @@ const Home = () => {
           }
           setCookie('sessionId', `${userFormData.username}`, { path: '/' });
         try {
-      const res = await AnotherUser(userFormData.username,userFormData.room)
+      const res = await AnotherUser(userFormData.username,userFormData.room.toUpperCase())
       if(!res.ok){
         throw new Error('Cant add user room')
       }
@@ -119,7 +119,7 @@ const Home = () => {
     catch (err) {
       console.error(err);
     }
-        navigate(`/Game/${userFormData.room}`);
+        navigate(`/Game/${userFormData.room.toUpperCase()}`);
       }
     }
     catch (err) {

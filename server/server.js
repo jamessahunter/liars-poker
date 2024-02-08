@@ -1,11 +1,7 @@
 const express = require('express');
-// Uncomment the following code once you have built the queries and mutations in the client folder
-// const { ApolloServer } = require('@apollo/server');
-// const { expressMiddleware } = require('@apollo/server/express4');
+
 const path = require('path');
 
-// Uncomment the following code once you have built the queries and mutations in the client folder
-// const { typeDefs, resolvers } = require('./schemas');
 const db = require('./config/connection');
 
 // Comment out this code once you have built out queries and mutations in the client folder
@@ -13,22 +9,11 @@ const routes = require('./routes');
 
 const PORT = process.env.PORT || 3001;
 const app = express();
-// Uncomment the following code once you have built the queries and mutations in the client folder
-// const server = new ApolloServer({
-//   typeDefs,
-//   resolvers,
-// });
-
-// Uncomment the following code once you have built the queries and mutations in the client folder
-// const startApolloServer = async () => {
-//   await server.start();
+const server = require('http').Server(app);
   
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
   
-  // Uncomment the following code once you have built the queries and mutations in the client folder
-  // app.use('/graphql', expressMiddleware(server));
-
   // Comment out this code once you have built out queries and mutations in the client folder
   app.use(routes);
 
@@ -36,25 +21,46 @@ const app = express();
   if (process.env.NODE_ENV === 'production') {
     app.use(express.static(path.join(__dirname, '../client/dist')));
 
-    // Uncomment this code once you have built out queries and mutations in the client folder
-    // app.get('*', (req, res) => {
-      // res.sendFile(path.join(__dirname, '../client/dist/index.html'));
-    // });
   } // closes if (process.env.NODE_ENV === 'production') condition
 
-// Uncomment this code once you have built out queries and mutations in the client folder
-//   db.once('open', () => {
-//     app.listen(PORT, () => {
-//       console.log(`API server running on port ${PORT}!`);
-//       console.log(`Use GraphQL at http://localhost:${PORT}/graphql`);
-//     });
-//   });
-// };
 
 // Comment out this code once you have built out queries and mutations in the client folder
 db.once('open', () => {
   app.listen(PORT, () => console.log(`Now listening on localhost: ${PORT}`));
 });
 
-// Uncomment the following code once you have built the queries and mutations in the client folder
-// startApolloServer();
+const WebSocket = require('ws');
+
+const wss = new WebSocket.Server({ port: 8080 }); // Replace 8080 with the desired port number
+
+// Store the connected clients
+const clients = new Set();
+
+wss.on('connection', (ws) => {
+  console.log('WebSocket connection established');
+  // Add the new client to the set
+  clients.add(ws);
+  ws.on('message', (message) => {
+    // const receivedData = JSON.parse(message.data);
+    const messageString = message.toString('utf8');
+    const parse = JSON.parse(messageString);
+    // console.log(parse)
+    // console.log('Received message:', messageString);
+    // console.log(parse[1]);
+    if(parse[1]==='started'){
+      // console.log("test")
+    // Process the received message and send a response if needed
+    clients.forEach((client) => {
+      client.send(messageString);
+    });
+    // ws.send(messageString);
+    }
+  });
+
+  ws.on('close', () => {
+    console.log('WebSocket connection closed');
+  });
+});
+
+
+
