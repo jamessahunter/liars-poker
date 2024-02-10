@@ -2,8 +2,18 @@ const {Room, User} = require('../models');
 const mongoose = require('mongoose');
 
 module.exports = {
+  async getUserTurn(req,res){
+    console.log('turn')
+    const room = await Room.findOne(
+      {room: req.params.code},
+    )
+    // console.log(room)
+    let userTurn=room.userTurn;
+    res.status(200).json(userTurn);
+  },
     async getRoomUser(req, res) {
       // console.log(req.params)
+      // console.log('users')
       const allUser= await Room.findOne({room: req.params.code})
       // console.log(allUser.users)
       if (!allUser) {
@@ -44,6 +54,16 @@ module.exports = {
         );
         res.status(200).json('User added')
     },
+
+    async updateTurn(req,res){
+      console.log("update Turn")
+      const room = await Room.findOneAndUpdate(
+        { room: req.params.code },
+        { $set: { userTurn: req.body.userTurn } },
+        { new: true }
+      );
+      res.status(200).json('updated turn')
+  },
 
 
 }

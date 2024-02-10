@@ -45,7 +45,7 @@ wss.on('connection', (ws) => {
     const messageString = message.toString('utf8');
     const parse = JSON.parse(messageString);
     // console.log(parse)
-    // console.log('Received message:', messageString);
+    console.log('Received message:', messageString);
     // console.log(parse[1]);
     if(parse[1]==='started'){
       // console.log("test")
@@ -54,6 +54,10 @@ wss.on('connection', (ws) => {
       client.send(messageString);
     });
     // ws.send(messageString);
+    } else if(parse[1]==='next user'){
+      clients.forEach((client) => {
+        client.send(messageString);
+      });
     }
   });
 

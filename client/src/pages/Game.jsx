@@ -1,16 +1,20 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
-import { getRoomUser, getUser, addCard } from '../utils/api';
-import io from 'socket.io-client';
-// import { Socket } from 'socket.io';
+import { getRoomUser, getUser, addCard, getUserTurn, updateTurn } from '../utils/api';
+
 
 
 const Game = () =>{
 
     const [cookies, setCookie, removeCookie] = useCookies(['sessionId']);
     const [players, setPlayers] = useState([]);
-    const [userTurn, setUserTurn] = useState(0);
+    const [userTurn, setUserTurn] = useState()
+      // () => {
+      //   const storedUserTurn = localStorage.getItem('userTurn');
+      //   console.log("stored "+storedUserTurn)
+      //   return storedUserTurn ? parseInt(storedUserTurn) : 0;
+      // });
     const [playersIn, setPlayersIn] = useState([]);
     const [started, setStarted] = useState(false);
     let code = window.location.toString().split('/')[
@@ -20,46 +24,61 @@ const Game = () =>{
     for(let i=0;i<52;i++){
         cards[i]=1;
     }
-    // console.log(cards);
-    // let players;
 
-    useEffect(() => {
-        console.log(playersIn);
-      }, [playersIn]);
     let maxCards;
     useEffect (() =>{
         getPlayers()
         },[players])
+    useEffect(() => {
+        //  localStorage.setItem('userTurn', userTurn.toString());
+        console.log("test")
+    }, [userTurn]);
     useEffect(()=>{
         console.log(started)
     },[started])
+
+    const getTurn = async () =>{
+      try{
+        let resTurn=await getUserTurn(code);
+        let turn  = await resTurn.json();
+        console.log(turn)
+        setUserTurn(turn);
+      } catch(err){
+          console.error(err)
+      }
+    }
+
     const getPlayers = async () =>{
         try{
             let res=await getRoomUser(code);
             let players = await res.json();
-    //   console.log(players)
+      // console.log(players)
       if(players.length>6){
         maxCards=4;
       }else{
         maxCards=5;
       }
       setPlayers(players)
+      setPlayersIn(players)
+    //   for(let i=0;i<players.length;i++){
+    //   if(players.stillIn){
+    //     setPlayersIn((prevPlayersIn) => [...prevPlayersIn, players.username]);
+    // }
         } catch(err){
             console.error(err)
         }
+        // console.log("test")
     }
     // getPlayers();
     const handleButtonClick = async (event) => {
         event.preventDefault();
         setStarted(true)
-        // console.log(started)
-        for(let i=0;i<players.length;i++){
+        for(let i=0;i<playersIn.length;i++){
             let res = await getUser(players[i])
             let user = await res.json()
-            // console.log(user)
-            // console.log(cookies.sessionId);
+
             if(user.stillIn){
-                setPlayersIn((prevPlayersIn) => [...prevPlayersIn, user.username]);
+                // setPlayersIn((prevPlayersIn) => [...prevPlayersIn, user.username]);
                 for(let i=0;i<user.card_count;i++){
                     let randomNumber = Math.floor(Math.random() * 52);
                     while(cards[randomNumber]!==1){
@@ -73,21 +92,24 @@ const Game = () =>{
 
         }
         console.log(playersIn);
-        const message = [code, 'started'];
+        const message = [code, 'started', playersIn].flat();
+        console.log(message)
         sendMessage(JSON.stringify(message));
     }
 
     const handleNextUser = async (event) => {
-        if(userTurn+1>=playersIn.length){
-            setUserTurn(0)
-        } else {
-            setUserTurn(userTurn+1);
-        }
-        console.log(userTurn);
-
-
+        // userTurn=localStorage.getItem('userTurn')
+      if(userTurn+1>=playersIn.length){
+        console.log('reset')
+        updateTurn(0,code);
+      } else {
+        console.log('+1')
+        updateTurn(userTurn+1,code);
+      }
+        getTurn();
+        const message = [code, 'next user',userTurn];
+        sendMessage(JSON.stringify(message));
     }
-
     const [socket, setSocket] = useState(null);
 
   useEffect(() => {
@@ -97,23 +119,35 @@ const Game = () =>{
       console.log('WebSocket connection established');
     };
 
-    ws.onmessage = (event) => {
+    ws.onmessage = async (event) => {
         // console.log('messae')
       const message = event.data;
     //   console.log(message)
       const parse=JSON.parse(message);
       console.log('Received message:', parse);
-      if(parse[1]==='started'){
-        setStarted(true);
-      }
+        if(parse[0]===code){
+            if(parse[1]==='started'){
+                setStarted(true);
+                getTurn();
+            } else if(parse[1]==='next user'){
+              console.log(parse[2])
+              console.log(playersIn.length)
+
+                // let temp;
+                // console.log("before " +userTurn);
+                // console.log("players in length " +playersIn.length);
+                // console.log(userTurn+1>=playersIn.length)
+                // console.log(parse[2])
+                // setUserTurn(parse[2]);
+                // console.log("after " + userTurn);
+            }
+        }
     };
 
     ws.onclose = () => {
       console.log('WebSocket connection closed');
     };
-
     setSocket(ws);
-
     // Clean up the WebSocket connection on component unmount
     return () => {
       ws.close();
@@ -127,10 +161,6 @@ const Game = () =>{
       socket.send(message);
     }
   };
-
-
-
-
 
     return (
         <>
@@ -169,3 +199,10 @@ const Game = () =>{
  }
 
 export default Game;
+
+    // console.log(cards);
+    // let players;
+    // let userTurn=0;
+    // useEffect(() => {
+    //     console.log(playersIn);
+    //   }, [playersIn]);

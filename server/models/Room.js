@@ -14,6 +14,10 @@ const roomSchema = new Schema({
     type: [String],
     ref: 'User',
   },
+  userTurn:{
+    type: Number,
+    default: 0,
+  }
   
 });
 

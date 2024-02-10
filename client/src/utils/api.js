@@ -92,7 +92,7 @@ export const createRoom = (code) => {
 }
 
 export const addUser = (username,code) => {
-  return fetch(`/api/room/${code}`,{
+  return fetch(`/api/room/add/${code}`,{
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -102,7 +102,7 @@ export const addUser = (username,code) => {
 }
 
   export const AnotherUser = (username,code) => {
-    return fetch(`/api/room/${code}`,{
+    return fetch(`/api/room/another/${code}`,{
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -113,10 +113,31 @@ export const addUser = (username,code) => {
 
 export const getRoomUser = (code) => {
   // console.log(code)
-  return fetch(`/api/room/${code}`, {
+  return fetch(`/api/room/user/${code}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
     },
   });
 };
+
+  export const getUserTurn = (code) => {
+    console.log('turn')
+    return fetch(`/api/room/turn/${code}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+};
+
+export const updateTurn = (turn,code) => {
+  console.log(turn);
+  return fetch(`/api/room/turn/${code}`,{
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: `{"userTurn" : ${turn}}`,
+  })
+}
