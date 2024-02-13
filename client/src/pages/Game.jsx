@@ -196,32 +196,37 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
         let chosenHandNum = null;
           // Find the object in the hands array that matches the selected hand
         const selectedHand = hands.find(hand => hand.name === chosenHand);
-        console.log(hand)
+        // console.log(hand)
         const currentHand = hands.find(handname => handname.name === hand[0])
-        console.log(currentHand);
+        // console.log(currentHand);
         if (selectedHand) {
             chosenHandNum = selectedHand.num;
         }
-        console.log(selectedHand);
-        console.log(chosenHandNum);
-        console.log(hand[3])
-        console.log(suits.indexOf(hand[3]))
+        // console.log(selectedHand);
+        // console.log(chosenHandNum);
+        // console.log(hand[3])
+        // console.log(suits.indexOf(hand[3]))
         if(hand[0]){
+            console.log('check')
         if(selectedHand.num<currentHand.num){
             console.log('hand not high enoguh')
             return;
         } else if(selectedHand.num===currentHand.num){
-            if(suits.indexOf(hand[3])>suits.indexOf(suit)){
+            if(suits.indexOf(hand[3])>suits.indexOf(suit) ){
                 console.log('higher suit needed')
                 return;
             }
-            if(hand[1]>=card1 && suits.indexOf(hand[3])===suits.indexOf(suit)){
+            if(suits.indexOf(hand[3])===suits.indexOf(suit) && selectedHand.name=='Flush'){
+                console.log('higher suit needed')
+                return;
+            }
+            if(hand[1]>=card1 && suits.indexOf(hand[3])===suits.indexOf(suit) && selectedHand.name!=='Flush'){
                 console.log('select higher card')
                 return;
             }
         }
             if(selectedHand.name ==='Two Pair' || selectedHand.name === 'Full House'){
-                if(allCards.indexOf(card1)!==allCards.indexOf(card2)){
+                if(allCards.indexOf(card1)==allCards.indexOf(card2)){
                     console.log('cards must not be the same')
                     return;
                 }
@@ -233,7 +238,25 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
                     return;
                 }
             }
-        } 
+        } else {
+            if(hand[1]>=card1 && suits.indexOf(hand[3])===suits.indexOf(suit)){
+                console.log('select higher card')
+                return;
+            }
+            if(selectedHand.name ==='Two Pair' || selectedHand.name === 'Full House'){
+                if(allCards.indexOf(card1)==allCards.indexOf(card2)){
+                    console.log('cards must not be the same')
+                    return;
+                }
+            }
+            if(selectedHand.name === 'Straight' || selectedHand.name ==='Straight Flush'|| selectedHand.name==='Royal Flush'){
+                console.log(allCards.indexOf(card1)-allCards.indexOf(card2))
+                if(allCards.indexOf(card1)-allCards.indexOf(card2)!==4){
+                    console.log('cards must be 5 apart')
+                    return;
+                }
+            }
+        }
         addHand(code,selectedHand.name,card1,card2,suit)
         if(userTurn+1>=playersIn.length){
           // console.log('reset')
@@ -263,6 +286,236 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
         getHands()
       }
 
+      const handleBS = async ()=>{
+        console.log('BS')
+        let res = await getDealt(code)
+        let dealt = await res.json();
+        // console.log(dealt)
+        switch(hand[0]){
+            case 'High Card':
+                checkHigh(dealt)
+            break;
+            case 'Pair':
+                checkMulti(dealt,'Pair')
+            break;
+            case 'Two Pair':
+                checkMulti(dealt,'Two')
+            break;
+            case 'Three of a Kind':
+                checkMulti(dealt,'Three')
+            break;
+            case 'Flush':
+                checkFlush(dealt);    
+            break;
+            case 'Straight':
+                checkStraight(dealt)
+            break;
+            case 'Full House':
+                checkMulti(dealt,'Full')
+            break;
+            case 'Four of a Kind':
+                checkMulti(dealt,'Four')
+            break;
+            case 'Straight Flush':
+                checkStraightFlush(dealt)
+            break;
+            case 'Royal Flush':
+                checkStraightFlush(dealt)
+            break;
+        }
+      }
+
+      const checkHigh = (dealt) => {
+        console.log(hand[1])
+        for(let i=0;i<dealt.length;i++){
+            if(dealt[i].length===3){
+                if(dealt[i][0]===hand[1][0] && dealt[i][1]===hand[1][1] && dealt[i][2]===hand[3][0]){
+                    console.log('pass')
+                    return
+                }
+            }else{
+                if(dealt[i][0]===hand[1][0] && dealt[i][1]===hand[3][0]){
+                    console.log('pass')
+                    return
+                }
+            }
+      }
+      console.log('fail')
+    }
+    const checkMulti = (dealt,handCheck) => {
+        let obj={};
+        for(let i=0;i<dealt.length;i++){
+            if(dealt[i].length===3){
+                if(obj[dealt[i][1]]){
+                    obj[dealt[i][1]]++;
+                } else {
+                    obj[dealt[i][1]]=1
+                }
+            } else{
+                if(obj[dealt[i][0]]){
+                    obj[dealt[i][0]]++;
+                } else {
+                    obj[dealt[i][0]]=1
+                }
+            }
+        }
+        if(handCheck==='Pair'){
+            if(hand[1]===10){
+                if(obj[hand[1][1]]>=2){
+                    console.log('pass')
+                } else {
+                    console.log('fail')
+                }
+            } else{
+                if(obj[hand[1][0]]>=2){
+                console.log('pass')
+                } else {
+                    console.log('fail')
+                }
+            }
+        } else if(handCheck==='Two'){
+            if(hand[1]===10){
+                if(obj[hand[1][1]]>=2 && obj[hand[2][0]]>=2){
+                    console.log('pass')
+                } else {
+                    console.log('fail')
+                }
+            }else if(hand[2]===10){
+                if(obj[hand[1][0]]>=2 && obj[hand[2][1]]>=2){
+                    console.log('pass')
+                } else {
+                    console.log('fail')
+                }
+            }  
+            else{
+                if(obj[hand[1][0]]>=2 && obj[hand[2][0]]>=2){
+                console.log('pass')
+                } else {
+                    console.log('fail')
+                }
+            }
+        } else if(handCheck==='Three'){
+            if(hand[1]===10){
+                if(obj[hand[1][1]]>=3){
+                    console.log('pass')
+                } else {
+                    console.log('fail')
+                }
+            } else{
+                if(obj[hand[1][0]]>=3){
+                console.log('pass')
+                } else {
+                    console.log('fail')
+                }
+            }
+        } else if(handCheck==='Full'){
+            if(hand[1]===10){
+                if(obj[hand[1][1]]>=3 && obj[hand[2][0]]>=2){
+                    console.log('pass')
+                } else {
+                    console.log('fail')
+                }
+            }else if(hand[2]===10){
+                if(obj[hand[1][0]]>=3 && obj[hand[2][1]]>=2){
+                    console.log('pass')
+                } else {
+                    console.log('fail')
+                }
+            } else{
+                if(obj[hand[1][0]]>=3 && obj[hand[2][0]]>=2){
+                console.log('pass')
+                } else {
+                    console.log('fail')
+                }
+            }
+        }else {
+            if(hand[1]===10){
+                if(obj[hand[1][1]]>=4){
+                    console.log('pass')
+                } else {
+                    console.log('fail')
+                }
+            } else{
+                if(obj[hand[1][0]]>=4){
+                console.log('pass')
+                } else {
+                    console.log('fail')
+                }
+            }
+        }
+    }
+      const checkFlush = (dealt) => {
+        let obj={};
+        for(let i=0;i<dealt.length;i++){
+            if(dealt[i].length===3){
+                if(obj[dealt[i][2]]){
+                    obj[dealt[i][2]]++;
+                } else {
+                    obj[dealt[i][2]]=1
+                }
+            } else{
+                if(obj[dealt[i][1]]){
+                    obj[dealt[i][1]]++;
+                } else {
+                    obj[dealt[i][1]]=1
+                }
+            }
+        }
+        if(obj[hand[3][0]]>=5){
+            console.log('pass')
+        } else {
+            console.log('fail')
+        }
+      }
+      const checkStraight = (dealt) => {
+        let obj={};
+        for(let i=0;i<dealt.length;i++){
+            if(dealt[i].length===3){
+                if(obj[dealt[i][1]]){
+                    obj[dealt[i][1]]++;
+                } else {
+                    obj[dealt[i][1]]=1
+                }
+            } else{
+                if(obj[dealt[i][0]]){
+                    obj[dealt[i][0]]++;
+                } else {
+                    obj[dealt[i][0]]=1
+                }
+            }
+        }
+        for(let i=allCards.indexOf(hand[2])+2;i<=allCards.indexOf(hand[1])+2;i++){
+            console.log(i)
+            if(i===10){
+                if(!obj[0]){
+                    console.log('fail')
+                    return;
+                }
+            } else {
+                if(!obj[allCards[i]]){
+                    console.log('fail')
+                    return;
+                }
+            }
+        }
+        console.log("pass")
+      }
+
+      const checkStraightFlush = (dealt) => {
+        let obj={};
+        for(let i=0;i<dealt.length;i++){
+             obj[dealt[i]]=1
+        }
+        console.log(obj)
+        for(let i=allCards.indexOf(hand[2]);i<=allCards.indexOf(hand[1]);i++){
+            console.log(allCards[i]+hand[3][0])
+            if(!obj[allCards[i]+hand[3][0]]){
+                console.log('fail')
+                return
+            }
+        }
+        console.log('pass')
+    }
     return (
         <>
         {!started ? (
@@ -290,7 +543,7 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
               <li>{card}</li>
             ))}
             </ul>
-            <button type='submit' onClick={handleNextUser}>Next User</button>
+            {hand[0] ? <button type='submit' onClick={handleBS}>Call B.S.</button> : null}
             <>
             {playersIn[userTurn]===cookies.sessionId ? (
               <>
