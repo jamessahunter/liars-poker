@@ -180,12 +180,13 @@ const Game = () =>{
   };
 
   let isVisible=false;
-const hands = [{name:'None'},{name:'High Card',num:1}, {name:'Pair',num:2}, {name:'Two Pair',num:3}, {name:'Three of a Kind',num:4},
+const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}, {name:'Two Pair',num:3}, {name:'Three of a Kind',num:4},
     {name:'Flush',num:5}, {name:'Straight',num:6}, {name:'Full House',num:7}, {name:'Four of a Kind',num:8},
     {name:'Straight Flush',num:9}, {name:'Royal Flush',num:10}];
     const allCards = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
     const suits = ['Clubs', 'Daimonds', 'Hearts', 'Spades'];
     const [hand, setHand] = useState('None');
+    const [selected, setSelected] = useState('None');
     const handleFormSubmit = async (event) => {
         event.preventDefault();
         let card1=event.target.card1.value
@@ -195,12 +196,44 @@ const hands = [{name:'None'},{name:'High Card',num:1}, {name:'Pair',num:2}, {nam
         let chosenHandNum = null;
           // Find the object in the hands array that matches the selected hand
         const selectedHand = hands.find(hand => hand.name === chosenHand);
-
+        console.log(hand)
+        const currentHand = hands.find(handname => handname.name === hand[0])
+        console.log(currentHand);
         if (selectedHand) {
             chosenHandNum = selectedHand.num;
         }
         console.log(selectedHand);
         console.log(chosenHandNum);
+        console.log(hand[3])
+        console.log(suits.indexOf(hand[3]))
+        if(hand[0]){
+        if(selectedHand.num<currentHand.num){
+            console.log('hand not high enoguh')
+            return;
+        } else if(selectedHand.num===currentHand.num){
+            if(suits.indexOf(hand[3])>suits.indexOf(suit)){
+                console.log('higher suit needed')
+                return;
+            }
+            if(hand[1]>=card1 && suits.indexOf(hand[3])===suits.indexOf(suit)){
+                console.log('select higher card')
+                return;
+            }
+        }
+            if(selectedHand.name ==='Two Pair' || selectedHand.name === 'Full House'){
+                if(allCards.indexOf(card1)!==allCards.indexOf(card2)){
+                    console.log('cards must not be the same')
+                    return;
+                }
+            }
+            if(selectedHand.name === 'Straight' || selectedHand.name ==='Straight Flush'|| selectedHand.name==='Royal Flush'){
+                console.log(allCards.indexOf(card1)-allCards.indexOf(card2))
+                if(allCards.indexOf(card1)-allCards.indexOf(card2)!==4){
+                    console.log('cards must be 5 apart')
+                    return;
+                }
+            }
+        } 
         addHand(code,selectedHand.name,card1,card2,suit)
         if(userTurn+1>=playersIn.length){
           // console.log('reset')
@@ -216,7 +249,7 @@ const hands = [{name:'None'},{name:'High Card',num:1}, {name:'Pair',num:2}, {nam
     const handleInputChange = (event) => {
         // console.log(event.target.value)
         // const { name, value } = event.target;
-        setHand(event.target.value);
+        setSelected(event.target.value);
         // console.log(hand)
       };
 
@@ -274,7 +307,7 @@ const hands = [{name:'None'},{name:'High Card',num:1}, {name:'Pair',num:2}, {nam
                 );
                 })}
             </select>
-            {(hand==='High Card') ? (
+            {(selected==='High Card') ? (
                 <>
                 <select name="card1" >
                     {allCards.map((card) => {
@@ -300,7 +333,7 @@ const hands = [{name:'None'},{name:'High Card',num:1}, {name:'Pair',num:2}, {nam
                 <button type='submit'>Submit</button>
                 </>
             ) : null}
-            {(hand==='Pair' || hand==='Three of a Kind'|| hand==='Four of a Kind') ? (
+            {(selected==='Pair' || selected==='Three of a Kind'|| selected==='Four of a Kind') ? (
                 <>
                 <select name="card1" >
                     {allCards.map((card) => {
@@ -319,7 +352,7 @@ const hands = [{name:'None'},{name:'High Card',num:1}, {name:'Pair',num:2}, {nam
                 <button type='submit'>Submit</button>
                 </>
             ) : null}
-            {(hand === 'Two Pair' || hand === 'Full House' || hand ==='Straight') ? (
+            {(selected === 'Two Pair' || selected === 'Full House' || selected ==='Straight') ? (
                 <>
                 <label>Top Card, Three of a Kind</label>
                 <select name="card1" >
@@ -346,7 +379,7 @@ const hands = [{name:'None'},{name:'High Card',num:1}, {name:'Pair',num:2}, {nam
                 <button type='submit'>Submit</button>
                 </>
             ): null}
-            {hand==='Flush' ?
+            {selected==='Flush' ?
             <>
              <select name="card1" value={null} disabled>
             </select>
@@ -365,7 +398,7 @@ const hands = [{name:'None'},{name:'High Card',num:1}, {name:'Pair',num:2}, {nam
             <button type='submit'>Submit</button>
             </>
             : null}
-            {hand ==='Straight Flush'|| hand==='Royal Flush' ?
+            {selected ==='Straight Flush'|| selected==='Royal Flush' ?
             <>
             <label>Top Card </label>
             <select name="card1" >
