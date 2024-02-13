@@ -17,7 +17,10 @@ const roomSchema = new Schema({
   userTurn:{
     type: Number,
     default: 0,
-  }
+  },
+  hand:[{
+    type: String,
+  }]
   
 });
 

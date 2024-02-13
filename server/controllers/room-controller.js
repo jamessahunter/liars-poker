@@ -75,4 +75,31 @@ module.exports = {
       
     res.status(200).json('another card added')
     },
+
+    async getDealt(req, res) {
+      // console.log(req.params)
+      // console.log('users')
+      const allUser= await Room.findOne({room: req.params.code})
+      // console.log(allUser.users)
+      if (!allUser) {
+        return res.status(400).json({ message: 'No Users found' });
+      }
+      return res.json(allUser.cards_dealt)
+    },
+
+    async addHand(req, res) {
+      // console.log("add dealt")
+      // console.log(req.body)
+      const room = await Room.findOneAndUpdate(
+        {room: req.params.code},
+        {$set : {hand : req.body}},
+        { new: true })
+        
+      res.status(200).json('hand added')
+      },
+    async getHand(req,res) {
+      const room= await Room.findOne({room: req.params.code})
+      console.log(room.hand)
+      return res.json(room.hand)
+    }
 }

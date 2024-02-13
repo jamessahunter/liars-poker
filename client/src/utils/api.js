@@ -56,6 +56,16 @@ export const getUser = (username) => {
   });
 };
 
+export const getDealt = (code) => {
+  // console.log(code)
+  return fetch(`/api/room/dealt/${code}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+};
+
 export const addCard = (username, card) => {
   // console.log(card)
   return fetch(`/api/user/${username}`, {
@@ -78,6 +88,28 @@ export const addDealt = (room, card) => {
     body: `{"cards_dealt" : "${card}"}`,
   })
 }
+
+export const addHand = (room, hand, card1, card2, suit) => {
+  // console.log("hand")
+    const data = [hand, card1, card2, suit]
+  return fetch(`/api/room/hand/${room}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  })
+}
+
+export const getHand = (code) => {
+  // console.log(code)
+  return fetch(`/api/room/hand/${code}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+};
 
 export const createUser = (username) => {
   console.log(username)
