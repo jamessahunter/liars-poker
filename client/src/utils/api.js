@@ -57,13 +57,25 @@ export const getUser = (username) => {
 };
 
 export const addCard = (username, card) => {
-  console.log(card)
+  // console.log(card)
   return fetch(`/api/user/${username}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },
     body: `{"card" : "${card}"}`,
+  })
+}
+
+export const addDealt = (room, card) => {
+  // console.log("dealt")
+  // console.log(card)
+  return fetch(`/api/room/dealt/${room}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: `{"cards_dealt" : "${card}"}`,
   })
 }
 

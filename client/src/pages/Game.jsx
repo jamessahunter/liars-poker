@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
-import { getRoomUser, getUser, addCard, getUserTurn, updateTurn } from '../utils/api';
+import { getRoomUser, getUser, addCard, getUserTurn, updateTurn, addDealt } from '../utils/api';
 
 
 
@@ -9,14 +9,11 @@ const Game = () =>{
 
     const [cookies, setCookie, removeCookie] = useCookies(['sessionId']);
     const [players, setPlayers] = useState([]);
-    const [userTurn, setUserTurn] = useState()
-      // () => {
-      //   const storedUserTurn = localStorage.getItem('userTurn');
-      //   console.log("stored "+storedUserTurn)
-      //   return storedUserTurn ? parseInt(storedUserTurn) : 0;
-      // });
+    const [userHand, setUserHand] = useState([]);
+    const [userTurn, setUserTurn] = useState();
     const [playersIn, setPlayersIn] = useState([]);
     const [started, setStarted] = useState(false);
+    const [userCount, setUserCount] = useState(2);
     let code = window.location.toString().split('/')[
         window.location.toString().split('/').length-1
     ];
@@ -30,13 +27,15 @@ const Game = () =>{
         getPlayers()
         },[players])
     useEffect(() => {
-        //  localStorage.setItem('userTurn', userTurn.toString());
         console.log("test")
     }, [userTurn]);
     useEffect(()=>{
         console.log(started)
     },[started])
-
+    useEffect(()=>{
+      // console.log('hands')
+      getHands();
+    },[])
     const getTurn = async () =>{
       try{
         let resTurn=await getUserTurn(code);
@@ -70,6 +69,7 @@ const Game = () =>{
         // console.log("test")
     }
     // getPlayers();
+
     const handleButtonClick = async (event) => {
         event.preventDefault();
         setStarted(true)
@@ -78,6 +78,7 @@ const Game = () =>{
             let user = await res.json()
 
             if(user.stillIn){
+              setUserCount(user.card_count)
                 // setPlayersIn((prevPlayersIn) => [...prevPlayersIn, user.username]);
                 for(let i=0;i<user.card_count;i++){
                     let randomNumber = Math.floor(Math.random() * 52);
@@ -86,27 +87,28 @@ const Game = () =>{
                     }
                     // console.log(cards[randomNumber])
                     addCard(user.username, randomNumber)
+                    addDealt(code,randomNumber)
                     cards[randomNumber]=0;
                 }
             }
 
         }
-        console.log(playersIn);
+        // console.log(playersIn);
         const message = [code, 'started', playersIn].flat();
-        console.log(message)
+        // console.log(message)
         sendMessage(JSON.stringify(message));
     }
 
     const handleNextUser = async (event) => {
-        // userTurn=localStorage.getItem('userTurn')
+
       if(userTurn+1>=playersIn.length){
-        console.log('reset')
+        // console.log('reset')
         updateTurn(0,code);
       } else {
-        console.log('+1')
+        // console.log('+1')
         updateTurn(userTurn+1,code);
       }
-        getTurn();
+        await getTurn();
         const message = [code, 'next user',userTurn];
         sendMessage(JSON.stringify(message));
     }
@@ -128,18 +130,13 @@ const Game = () =>{
         if(parse[0]===code){
             if(parse[1]==='started'){
                 setStarted(true);
+                getHands();
                 getTurn();
             } else if(parse[1]==='next user'){
-              console.log(parse[2])
-              console.log(playersIn.length)
-
-                // let temp;
-                // console.log("before " +userTurn);
-                // console.log("players in length " +playersIn.length);
-                // console.log(userTurn+1>=playersIn.length)
-                // console.log(parse[2])
-                // setUserTurn(parse[2]);
-                // console.log("after " + userTurn);
+              // console.log(parse[2])
+              // console.log(playersIn.length)
+              await getTurn();
+              // console.log(userTurn)
             }
         }
     };
@@ -162,6 +159,54 @@ const Game = () =>{
     }
   };
 
+
+const hands = [{name:'None'},{name:'High Card',num:1}, {name:'Pair',num:2}, {name:'Two Pair',num:3}, {name:'Three of a Kind',num:4},
+    {name:'Flush',num:5}, {name:'Straight',num:6}, {name:'Full House',num:7}, {name:'Four of a Kind',num:8},
+    {name:'Straight Flush',num:9}, {name:'Royal Flush',num:10}];
+    const allCards = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+    const suits = ['Clubs', 'Daimonds', 'Hearts', 'Spades'];
+    const [hand, setHand] = useState('None');
+    const handleFormSubmit = async (event) => {
+        event.preventDefault();
+        // console.log("test")
+        let chosenHand=event.target.hand.value;
+        let chosenHandNum = null;
+          // Find the object in the hands array that matches the selected hand
+        const selectedHand = hands.find(hand => hand.name === chosenHand);
+
+        if (selectedHand) {
+            chosenHandNum = selectedHand.num;
+        }
+
+        console.log(chosenHandNum);
+        if(userTurn+1>=playersIn.length){
+          // console.log('reset')
+          updateTurn(0,code);
+        } else {
+          // console.log('+1')
+          updateTurn(userTurn+1,code);
+        }
+          getTurn();
+          const message = [code, 'next user',userTurn];
+          sendMessage(JSON.stringify(message));
+    };
+    const handleInputChange = (event) => {
+        // console.log(event.target.value)
+        // const { name, value } = event.target;
+        setHand(event.target.value);
+        // console.log(hand)
+      };
+
+      const getHands = async()=>{
+        let handRes= await getUser(cookies.sessionId);
+        let result= await handRes.json()
+        setUserHand(result.cards);
+        console.log(userHand) 
+      }
+      const handleClickCard = ()=>{
+        getHands()
+      }
+
     return (
         <>
         {!started ? (
@@ -182,12 +227,145 @@ const Game = () =>{
         ) : (
             <>
             <div>started</div>
+            <ul>
+            {userCount!== userHand.length ? <button onClick={handleClickCard} >Click to get Cards</button> :
+            userHand.map((card) => (
+              <li>{card}</li>
+            ))}
+            </ul>
             <button type='submit' onClick={handleNextUser}>Next User</button>
             <>
             {playersIn[userTurn]===cookies.sessionId ? (
-            <p>your turn</p>
+              <>
+            <p>your turn {userTurn}</p>
+            <div className="card-body m-5">
+            <form onSubmit={handleFormSubmit}>
+            <label>Possible Hands: </label>
+            <select name="hand" onChange={handleInputChange}>
+                {hands.map((hand) => {
+                return (
+                    <option key={hand._id} value={hand.name}>
+                    {hand.name}
+                    </option>
+                );
+                })}
+            </select>
+            {(hand==='High Card') ? (
+                <>
+                <select name="cards" >
+                    {allCards.map((card) => {
+                        return (
+                            <option key={card._id} value={card}>
+                                {card}
+                            </option>
+                        );
+                    })}
+                </select>
+                <select name="suit" >
+                    {suits.map((suit) => {
+                        return (
+                            <option key={suit._id} value={suit}>
+                                    {suit}
+                            </option>
+                        );
+                    })}
+                </select>
+                <button type='submit'>Submit</button>
+                </>
+            ) : null}
+            {(hand==='Pair' || hand==='Three of a Kind'|| hand==='Four of a Kind') ? (
+                <>
+                <select name="cards" >
+                    {allCards.map((card) => {
+                        return (
+                            <option key={card._id} value={card}>
+                                {card}
+                            </option>
+                        );
+                    })}
+                </select>
+                <button type='submit'>Submit</button>
+                </>
+            ) : null}
+            {(hand === 'Two Pair' || hand === 'Full House' || hand ==='Straight') ? (
+                <>
+                <label>Top Card, Three of a Kind</label>
+                <select name="cards" >
+                    {allCards.map((card) => {
+                        return (
+                            <option key={card._id} value={card}>
+                                {card}
+                            </option>
+                        );
+                    })}
+                </select>
+                <label>Bottom Card, Pair </label>
+                <select name="cards" >
+                    {allCards.map((card) => {
+                        return (
+                            <option key={card._id} value={card}>
+                                {card}
+                            </option>
+                    );
+                })}
+                </select>
+                <button type='submit'>Submit</button>
+                </>
+            ): null}
+            {hand==='Flush' ?
+            <>
+            <select name="suit" >
+            {suits.map((suit) => {
+                return (
+                    <option key={suit._id} value={suit}>
+                    {suit}
+                    </option>
+                );
+                })}
+            </select>
+            <button type='submit'>Submit</button>
+            </>
+            : null}
+            {hand ==='Straight Flush'|| hand==='Royal Flush' ?
+            <>
+            <label>Top Card </label>
+            <select name="cards" >
+                {allCards.map((card) => {
+                    return (
+                        <option key={card._id} value={card}>
+                            {card}
+                        </option>
+                    );
+                })}
+            </select>
+            <label>Bottom Card </label>
+            <select name="cards" >
+                {allCards.map((card) => {
+                    return (
+                        <option key={card._id} value={card}>
+                            {card}
+                        </option>
+                );
+            })}
+            </select>
+            <label>Suit </label>
+            <select name="suit" >
+            {suits.map((suit) => {
+                return (
+                    <option key={suit._id} value={suit}>
+                    {suit}
+                    </option>
+                );
+                })}
+            </select>
+            <button type='submit'>Submit</button>
+            </>
+        : null}
+            </form>
+        </div>
+        </>
             ) : (
-            <p>some elses turn</p>
+            <p>{playersIn[userTurn]} turn {userTurn}</p>
             )}
             </>
             </>

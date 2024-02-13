@@ -65,5 +65,14 @@ module.exports = {
       res.status(200).json('updated turn')
   },
 
-
+  async addDealt(req, res) {
+    // console.log("add dealt")
+    // console.log(req.body.cards_dealt)
+    const room = await Room.findOneAndUpdate(
+      {room: req.params.code},
+      {$addToSet : {cards_dealt : req.body.cards_dealt}},
+      { new: true })
+      
+    res.status(200).json('another card added')
+    },
 }

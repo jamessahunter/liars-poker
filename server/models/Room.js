@@ -7,9 +7,9 @@ const roomSchema = new Schema({
     required: true,
     unique: true,
   },
-  cards_delt:{
+  cards_dealt:[{
     type: String,
-  },
+  }],
   users: {
     type: [String],
     ref: 'User',

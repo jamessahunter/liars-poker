@@ -24,7 +24,11 @@ const Home = () => {
   // Check which button was clicked
   if (buttonId === 'create') {
     // Create a game logic
-    // console.log(userFormData.username)
+    console.log(userFormData.username)
+    if(userFormData.username===""){
+      // console.log("test")
+      return
+    }
     try {
       const res = await getAllUser(userFormData.room.toUpperCase())
       if(!res.ok){
@@ -85,6 +89,10 @@ const Home = () => {
 }
    else if (buttonId === 'room') {
     // Join a game logic
+    if(userFormData.username===""){
+      // console.log("test")
+      return
+    }
     try {
       const res = await getAllUser(userFormData.room.toUpperCase())
       if(!res.ok){
