@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
-import { getRoomUser, getUser, addCard, getUserTurn, updateTurn, addDealt, getDealt, addHand, getHand } from '../utils/api';
+import { getRoomUser, getUser, addCard, getUserTurn, updateTurn, addDealt, getDealt, addHand, getHand,
+addCount } from '../utils/api';
 
 
 
@@ -331,16 +332,21 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
             if(dealt[i].length===3){
                 if(dealt[i][0]===hand[1][0] && dealt[i][1]===hand[1][1] && dealt[i][2]===hand[3][0]){
                     console.log('pass')
+                    addtoCount('pass')
+
                     return
                 }
             }else{
                 if(dealt[i][0]===hand[1][0] && dealt[i][1]===hand[3][0]){
                     console.log('pass')
+                    addtoCount('pass')
+
                     return
                 }
             }
       }
       console.log('fail')
+      addtoCount('fail')
     }
     const checkMulti = (dealt,handCheck) => {
         let obj={};
@@ -362,84 +368,117 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
         if(handCheck==='Pair'){
             if(hand[1]===10){
                 if(obj[hand[1][1]]>=2){
+                    addtoCount('pass')
                     console.log('pass')
                 } else {
                     console.log('fail')
+                    addtoCount('fail')
                 }
             } else{
                 if(obj[hand[1][0]]>=2){
                 console.log('pass')
                 } else {
                     console.log('fail')
+                    addtoCount('fail')
                 }
             }
         } else if(handCheck==='Two'){
             if(hand[1]===10){
                 if(obj[hand[1][1]]>=2 && obj[hand[2][0]]>=2){
                     console.log('pass')
+                    addtoCount('pass')
+
                 } else {
                     console.log('fail')
+                    addtoCount('fail')
                 }
             }else if(hand[2]===10){
                 if(obj[hand[1][0]]>=2 && obj[hand[2][1]]>=2){
                     console.log('pass')
+                    addtoCount('pass')
+
                 } else {
                     console.log('fail')
+                    addtoCount('fail')
                 }
             }  
             else{
                 if(obj[hand[1][0]]>=2 && obj[hand[2][0]]>=2){
                 console.log('pass')
+                addtoCount('pass')
+
                 } else {
                     console.log('fail')
+                    addtoCount('fail')
                 }
             }
         } else if(handCheck==='Three'){
             if(hand[1]===10){
                 if(obj[hand[1][1]]>=3){
                     console.log('pass')
+                    addtoCount('pass')
+
                 } else {
                     console.log('fail')
+                    addtoCount('fail')
                 }
             } else{
                 if(obj[hand[1][0]]>=3){
                 console.log('pass')
+                addtoCount('pass')
+
                 } else {
                     console.log('fail')
+                    addtoCount('fail')
                 }
             }
         } else if(handCheck==='Full'){
             if(hand[1]===10){
                 if(obj[hand[1][1]]>=3 && obj[hand[2][0]]>=2){
                     console.log('pass')
+                    addtoCount('pass')
+
                 } else {
                     console.log('fail')
+                    addtoCount('fail')
                 }
             }else if(hand[2]===10){
                 if(obj[hand[1][0]]>=3 && obj[hand[2][1]]>=2){
                     console.log('pass')
+                    addtoCount('pass')
+
                 } else {
                     console.log('fail')
+                    addtoCount('fail')
                 }
             } else{
                 if(obj[hand[1][0]]>=3 && obj[hand[2][0]]>=2){
                 console.log('pass')
+                addtoCount('pass')
+
                 } else {
                     console.log('fail')
+                    addtoCount('fail')
                 }
             }
         }else {
             if(hand[1]===10){
                 if(obj[hand[1][1]]>=4){
                     console.log('pass')
+                    addtoCount('pass')
+
                 } else {
                     console.log('fail')
+                    addtoCount('fail')
                 }
             } else{
                 if(obj[hand[1][0]]>=4){
                 console.log('pass')
+                addtoCount('pass')
+
                 } else {
                     console.log('fail')
+                    addtoCount('fail')
                 }
             }
         }
@@ -463,8 +502,11 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
         }
         if(obj[hand[3][0]]>=5){
             console.log('pass')
+            addtoCount('pass')
+
         } else {
             console.log('fail')
+            addtoCount('fail')
         }
       }
       const checkStraight = (dealt) => {
@@ -489,16 +531,20 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
             if(i===10){
                 if(!obj[0]){
                     console.log('fail')
+                    addtoCount('fail')
                     return;
                 }
             } else {
                 if(!obj[allCards[i]]){
                     console.log('fail')
+                    addtoCount('fail')
                     return;
                 }
             }
         }
         console.log("pass")
+        addtoCount('pass')
+
       }
 
       const checkStraightFlush = (dealt) => {
@@ -511,11 +557,29 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
             console.log(allCards[i]+hand[3][0])
             if(!obj[allCards[i]+hand[3][0]]){
                 console.log('fail')
+                addtoCount('fail')
                 return
             }
         }
         console.log('pass')
+        addtoCount('fail')
+
     }
+
+
+    const addtoCount= (ans) => {
+        if(ans==='pass'){
+            addCount(playersIn[userTurn])
+        } else {
+            if(userTurn===0){
+                console.log(playersIn[playersIn.length-1])
+                addCount(playersIn[playersIn.length-1])
+            } else {
+                addCount(playersIn[userTurn-1])
+            }
+        }
+    }
+
     return (
         <>
         {!started ? (

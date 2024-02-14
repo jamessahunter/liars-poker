@@ -21,6 +21,16 @@ module.exports = {
     res.status(200).json('another card added')
     },
 
+    async addCount(req, res) {
+      console.log("add count")
+      const user = await User.findOneAndUpdate(
+        {username: req.params.username},
+        {$inc : {card_count: 1}},
+        { new: true })
+        
+      res.status(200).json('another card added')
+      },
+
   async getUser(req, res) {
     const user= await User.findOne({username: req.params.username});
 

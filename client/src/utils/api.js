@@ -68,12 +68,22 @@ export const getDealt = (code) => {
 
 export const addCard = (username, card) => {
   // console.log(card)
-  return fetch(`/api/user/${username}`, {
+  return fetch(`/api/user/card/${username}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },
     body: `{"card" : "${card}"}`,
+  })
+}
+
+export const addCount = (username) => {
+  console.log('add count')
+  return fetch(`/api/user/count/${username}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
   })
 }
 
