@@ -58,6 +58,14 @@ wss.on('connection', (ws) => {
       clients.forEach((client) => {
         client.send(messageString);
       });
+    } else if(parse[1]==='players'){
+      clients.forEach((client) => {
+        client.send(messageString);
+      });
+    } else if(parse[1]==='winner'){
+      clients.forEach((client) => {
+        client.send(messageString);
+      });
     }
   });
 

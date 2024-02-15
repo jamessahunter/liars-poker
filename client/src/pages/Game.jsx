@@ -16,6 +16,7 @@ const Game = () =>{
     const [started, setStarted] = useState(false);
     const [userCount, setUserCount] = useState(2);
     const [maxCards, setMaxCards] = useState();
+    const [winner, setWinner] = useState();
     let code = window.location.toString().split('/')[
         window.location.toString().split('/').length-1
     ];
@@ -85,19 +86,7 @@ const Game = () =>{
         sendMessage(JSON.stringify(message));
     }
 
-    const handleNextUser = async (event) => {
 
-      if(userTurn+1>=playersIn.length){
-        // console.log('reset')
-        updateTurn(0,code);
-      } else {
-        // console.log('+1')
-        updateTurn(userTurn+1,code);
-      }
-        await getTurn();
-        const message = [code, 'next user',userTurn];
-        sendMessage(JSON.stringify(message));
-    }
     const [socket, setSocket] = useState(null);
 
     const dealCards= async() => {
@@ -164,6 +153,13 @@ const Game = () =>{
               setHand(result)
               console.log(result)
               // console.log(hand)
+              setSelected('None')
+            } else if(parse[1]==='players'){
+                setPlayersIn(parse[2])
+                getHands();
+
+            } else if(parse[1]==='winner'){
+                setWinner(parse[2][0])
             }
         }
     };
@@ -186,7 +182,6 @@ const Game = () =>{
     }
   };
 
-  let isVisible=false;
 const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}, {name:'Two Pair',num:3}, {name:'Three of a Kind',num:4},
     {name:'Flush',num:5}, {name:'Straight',num:6}, {name:'Full House',num:7}, {name:'Four of a Kind',num:8},
     {name:'Straight Flush',num:9}, {name:'Royal Flush',num:10}];
@@ -264,15 +259,15 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
                 }
             }
         }
-        addHand(code,selectedHand.name,card1,card2,suit)
+        await addHand(code,selectedHand.name,card1,card2,suit)
         if(userTurn+1>=playersIn.length){
           // console.log('reset')
-          updateTurn(0,code);
+          await updateTurn(0,code);
         } else {
           // console.log('+1')
-          updateTurn(userTurn+1,code);
+          await updateTurn(userTurn+1,code);
         }
-          getTurn();
+          await getTurn();
           const message = [code, 'next user',userTurn];
           sendMessage(JSON.stringify(message));
     };
@@ -289,6 +284,7 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
         setUserHand(result.cards);
         console.log(userHand) 
       }
+
       const handleClickCard = ()=>{
         getHands()
       }
@@ -596,20 +592,38 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
                 }
             }
         }
-        resetCards();
+        if(playersIn.length===1){
+            const message = [code, 'winner', playersIn];
+            sendMessage(JSON.stringify(message));
+        } else {
+            const message = [code, 'players',playersIn];
+            sendMessage(JSON.stringify(message));
+            resetCards();
+        }
+
     }
 
-    const resetCards = () =>{
-        resetCardsDealt(code);
+    const resetCards = async() =>{
+        await resetCardsDealt(code);
         for(let i=0;i<playersIn.length;i++){
-            resetCardsPlayer(playersIn[i]);
+            await resetCardsPlayer(playersIn[i]);
         }
-        dealCards();
+        await dealCards();
+        // const message = [code,'round over'];
+        // sendMessage(JSON.stringify(message))
+        await getHands();
+        await getTurn();
+        let res= await getHand(code)
+        let result = await res.json();
+        setHand(result)
     }
 
     return (
         <>
-        {!started ? (
+        {winner ? (
+            <p>{winner} wins</p>
+        ) : (
+        !started ? (
             <>
             <h1>{code}</h1>
             <h2>Players</h2>
@@ -785,10 +799,12 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
             )}
             </>
             </>
-        )}
+        ))
+        }
         </>
         
     )
+
         
  }
 
@@ -800,3 +816,17 @@ export default Game;
     // useEffect(() => {
     //     console.log(playersIn);
     //   }, [playersIn]);
+
+        // const handleNextUser = async (event) => {
+
+    //   if(userTurn+1>=playersIn.length){
+    //     // console.log('reset')
+    //     updateTurn(0,code);
+    //   } else {
+    //     // console.log('+1')
+    //     updateTurn(userTurn+1,code);
+    //   }
+    //     await getTurn();
+    //     const message = [code, 'next user',userTurn];
+    //     sendMessage(JSON.stringify(message));
+    // }
