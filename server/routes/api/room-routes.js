@@ -9,7 +9,8 @@ const {
     addDealt,
     getDealt,
     addHand,
-    getHand
+    getHand,
+    resetCardsDealt
 
 } = require('../../controllers/room-controller')
 
@@ -23,4 +24,5 @@ router.route('/user/:code').get(getRoomUser);
 router.route('/turn/:code').get(getUserTurn);
 router.route('/dealt/:code').get(getDealt)
 router.route('/hand/:code').get(getHand)
+router.route('/reset/:code').put(resetCardsDealt)
 module.exports = router;

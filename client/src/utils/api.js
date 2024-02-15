@@ -77,13 +77,14 @@ export const addCard = (username, card) => {
   })
 }
 
-export const addCount = (username) => {
+export const addCount = (username,maxCards) => {
   console.log('add count')
   return fetch(`/api/user/count/${username}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },
+    body:`{"maxCards" : "${maxCards}" }`
   })
 }
 
@@ -96,6 +97,26 @@ export const addDealt = (room, card) => {
       'Content-Type': 'application/json',
     },
     body: `{"cards_dealt" : "${card}"}`,
+  })
+}
+
+export const resetCardsDealt = (room, card) => {
+  // console.log("dealt")
+  // console.log(card)
+  return fetch(`/api/room/reset/${room}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+}
+
+export const resetCardsPlayer = (username) => {
+  return fetch(`/api/user/resetCards/${username}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
   })
 }
 

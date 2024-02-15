@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 import { getRoomUser, getUser, addCard, getUserTurn, updateTurn, addDealt, getDealt, addHand, getHand,
-addCount } from '../utils/api';
+addCount, resetCardsDealt, resetCardsPlayer } from '../utils/api';
 
 
 
@@ -15,6 +15,7 @@ const Game = () =>{
     const [playersIn, setPlayersIn] = useState([]);
     const [started, setStarted] = useState(false);
     const [userCount, setUserCount] = useState(2);
+    const [maxCards, setMaxCards] = useState();
     let code = window.location.toString().split('/')[
         window.location.toString().split('/').length-1
     ];
@@ -27,7 +28,6 @@ const Game = () =>{
         cards[cardsArr[i]]=1;
     }
 
-    let maxCards;
     useEffect (() =>{
         getPlayers()
         },[players])
@@ -58,9 +58,9 @@ const Game = () =>{
             let players = await res.json();
       // console.log(players)
       if(players.length>6){
-        maxCards=4;
+        setMaxCards(4);
       }else{
-        maxCards=5;
+        setMaxCards(5);
       }
       setPlayers(players)
       setPlayersIn(players)
@@ -78,6 +78,30 @@ const Game = () =>{
     const handleButtonClick = async (event) => {
         event.preventDefault();
         setStarted(true)
+        dealCards();
+        // console.log(playersIn);
+        const message = [code, 'started', playersIn].flat();
+        // console.log(message)
+        sendMessage(JSON.stringify(message));
+    }
+
+    const handleNextUser = async (event) => {
+
+      if(userTurn+1>=playersIn.length){
+        // console.log('reset')
+        updateTurn(0,code);
+      } else {
+        // console.log('+1')
+        updateTurn(userTurn+1,code);
+      }
+        await getTurn();
+        const message = [code, 'next user',userTurn];
+        sendMessage(JSON.stringify(message));
+    }
+    const [socket, setSocket] = useState(null);
+
+    const dealCards= async() => {
+        console.log(playersIn)
         for(let i=0;i<playersIn.length;i++){
             let res = await getUser(players[i])
             let user = await res.json()
@@ -105,26 +129,8 @@ const Game = () =>{
             }
 
         }
-        // console.log(playersIn);
-        const message = [code, 'started', playersIn].flat();
-        // console.log(message)
-        sendMessage(JSON.stringify(message));
     }
 
-    const handleNextUser = async (event) => {
-
-      if(userTurn+1>=playersIn.length){
-        // console.log('reset')
-        updateTurn(0,code);
-      } else {
-        // console.log('+1')
-        updateTurn(userTurn+1,code);
-      }
-        await getTurn();
-        const message = [code, 'next user',userTurn];
-        sendMessage(JSON.stringify(message));
-    }
-    const [socket, setSocket] = useState(null);
 
   useEffect(() => {
     const ws = new WebSocket('ws://localhost:8080'); // Replace 'example.com/socket' with your server's WebSocket endpoint
@@ -567,17 +573,38 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
     }
 
 
-    const addtoCount= (ans) => {
+    const addtoCount= async (ans) => {
         if(ans==='pass'){
-            addCount(playersIn[userTurn])
+            let res= await addCount(playersIn[userTurn],maxCards);
+            let resjson = await res.json();
+            if(resjson==='remove'){
+                setPlayersIn(prevPlayersIn => prevPlayersIn.filter(player => player !== playersIn[userTurn]))
+            }
         } else {
             if(userTurn===0){
                 console.log(playersIn[playersIn.length-1])
-                addCount(playersIn[playersIn.length-1])
+                let res= await addCount(playersIn[playersIn.length-1],maxCards);
+                let resjson = await res.json();
+                if(resjson==='remove'){
+                    setPlayersIn(prevPlayersIn => prevPlayersIn.filter(player => player !== playersIn[playersIn.length-1]))
+                }
             } else {
-                addCount(playersIn[userTurn-1])
+                let res= await addCount(playersIn[userTurn-1],maxCards);
+                let resjson = await res.json();
+                if(resjson==='remove'){
+                    setPlayersIn(prevPlayersIn => prevPlayersIn.filter(player => player !== playersIn[userTurn-1]))
+                }
             }
         }
+        resetCards();
+    }
+
+    const resetCards = () =>{
+        resetCardsDealt(code);
+        for(let i=0;i<playersIn.length;i++){
+            resetCardsPlayer(playersIn[i]);
+        }
+        dealCards();
     }
 
     return (

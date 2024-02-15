@@ -101,5 +101,15 @@ module.exports = {
       const room= await Room.findOne({room: req.params.code})
       console.log(room.hand)
       return res.json(room.hand)
-    }
+    },
+
+    async resetCardsDealt(req,res) {
+      const room = await Room.findOneAndUpdate(
+        {room: req.params.code},
+        {$set : {cards_dealt : [], hand : []}},
+        { new: true })
+        
+      res.status(200).json('reset cards')
+      },
+
 }

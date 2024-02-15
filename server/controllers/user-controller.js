@@ -27,8 +27,15 @@ module.exports = {
         {username: req.params.username},
         {$inc : {card_count: 1}},
         { new: true })
-        
-      res.status(200).json('another card added')
+        // console.log(user)
+      if(user.card_count>req.body.maxCards){
+        await User.findOneAndUpdate(
+          {username: req.params.username},
+          {$set : {stillIn : false}},
+          { new: true })
+          res.status(200).json('remove')
+      }
+      res.status(200).json('added to count')
       },
 
   async getUser(req, res) {
@@ -48,5 +55,14 @@ module.exports = {
     }
 
     res.status(200).json(user);
+  },
+
+  async resetCardsPlayer(req,res){
+    console.log('reset player cards')
+    const user = await User.findOneAndUpdate(
+      {username: req.params.username},
+      {$set : {cards: []}},
+      {new: true}
+    )
   }
 };
