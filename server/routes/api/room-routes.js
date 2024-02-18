@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const {
+    getIn,
     createRoom,
     addUser,
     AnotherUser,
@@ -10,10 +11,13 @@ const {
     getDealt,
     addHand,
     getHand,
-    resetCardsDealt
+    resetCardsDealt,
+    setPlayersIn,
+
 
 } = require('../../controllers/room-controller')
 
+router.route('/getIn/:code').get(getIn)
 router.route('/').post(createRoom);
 router.route('/another/:code').put(AnotherUser);
 router.route('/add/:code').put(addUser);
@@ -25,4 +29,6 @@ router.route('/turn/:code').get(getUserTurn);
 router.route('/dealt/:code').get(getDealt)
 router.route('/hand/:code').get(getHand)
 router.route('/reset/:code').put(resetCardsDealt)
+router.route('/playersIn/:code').put(setPlayersIn)
+
 module.exports = router;

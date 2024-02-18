@@ -20,7 +20,13 @@ const roomSchema = new Schema({
   },
   hand:[{
     type: String,
-  }]
+  }],
+  playersIn:[{
+    type: String
+  }],
+  started: {
+    type: Boolean
+  }
   
 });
 

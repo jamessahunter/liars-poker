@@ -2,6 +2,19 @@ const {Room, User} = require('../models');
 const mongoose = require('mongoose');
 
 module.exports = {
+
+  async getIn(req, res) {
+    console.log('test')
+    // console.log(req.params)
+    console.log('get players in')
+    const allUser= await Room.findOne({room: req.params.code})
+    console.log(allUser.playersIn)
+    if (!allUser) {
+      return res.status(400).json({ message: 'No Users found' });
+    }
+    return res.json(allUser.playersIn)
+  },
+
   async getUserTurn(req,res){
     console.log('turn')
     const room = await Room.findOne(
@@ -112,4 +125,20 @@ module.exports = {
       res.status(200).json('reset cards')
       },
 
+      async setPlayersIn(req, res) {
+        console.log("set playersin")
+        console.log(req.body)
+        console.log(req.params.code)
+        const room = await Room.findOneAndUpdate(
+          {room: req.params.code},
+          {$set : {playersIn : req.body}},
+          { new: true })
+        // const allUser= await Room.findOne({room: req.params.code})
+        // console.log(allUser.playersIn)
+        // console.log(room)
+        // console.log(room2)
+        res.status(200).json('players in set')
+        },
+
+        
 }

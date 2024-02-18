@@ -34,8 +34,9 @@ module.exports = {
           {$set : {stillIn : false}},
           { new: true })
           res.status(200).json('remove')
+      } else{
+        res.status(200).json('added to count')
       }
-      res.status(200).json('added to count')
       },
 
   async getUser(req, res) {
@@ -64,5 +65,6 @@ module.exports = {
       {$set : {cards: []}},
       {new: true}
     )
+    res.status(200).json(user);
   }
 };

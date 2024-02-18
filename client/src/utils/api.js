@@ -216,3 +216,27 @@ export const updateTurn = (turn,code) => {
     body: `{"userTurn" : ${turn}}`,
   })
 }
+
+export const setPlayersIn = (playersIn,code) => {
+  // console.log("players")
+    const data = playersIn;
+    // console.log(data)
+  return fetch(`/api/room/playersIn/${code}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  })
+}
+
+export const getIn = (code) => {
+  // console.log("get players in")
+    // console.log(code)
+  return fetch(`/api/room/getIn/${code}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+}

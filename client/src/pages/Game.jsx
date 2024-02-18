@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 import { getRoomUser, getUser, addCard, getUserTurn, updateTurn, addDealt, getDealt, addHand, getHand,
-addCount, resetCardsDealt, resetCardsPlayer } from '../utils/api';
+addCount, resetCardsDealt, resetCardsPlayer, setPlayersIn, getIn } from '../utils/api';
 
 
 
@@ -12,7 +12,7 @@ const Game = () =>{
     const [players, setPlayers] = useState([]);
     const [userHand, setUserHand] = useState([]);
     const [userTurn, setUserTurn] = useState();
-    const [playersIn, setPlayersIn] = useState([]);
+    const [playerList, setPlayerList] = useState([]);
     const [started, setStarted] = useState(false);
     const [userCount, setUserCount] = useState(2);
     const [maxCards, setMaxCards] = useState();
@@ -57,31 +57,30 @@ const Game = () =>{
         try{
             let res=await getRoomUser(code);
             let players = await res.json();
-      // console.log(players)
+    //   console.log('test')
       if(players.length>6){
         setMaxCards(4);
       }else{
         setMaxCards(5);
       }
       setPlayers(players)
-      setPlayersIn(players)
-    //   for(let i=0;i<players.length;i++){
-    //   if(players.stillIn){
-    //     setPlayersIn((prevPlayersIn) => [...prevPlayersIn, players.username]);
-    // }
+
+
         } catch(err){
             console.error(err)
         }
         // console.log("test")
     }
-    // getPlayers();
+
 
     const handleButtonClick = async (event) => {
         event.preventDefault();
         setStarted(true)
-        dealCards();
+        await setPlayersIn(players,code)
+        await dealCards();
+
         // console.log(playersIn);
-        const message = [code, 'started', playersIn].flat();
+        const message = [code, 'started'];
         // console.log(message)
         sendMessage(JSON.stringify(message));
     }
@@ -90,11 +89,13 @@ const Game = () =>{
     const [socket, setSocket] = useState(null);
 
     const dealCards= async() => {
-        console.log(playersIn)
+        let res= await getIn(code);
+        let playersIn = await res.json();
+        // console.log(playersIn)
+        setPlayerList(playersIn)
         for(let i=0;i<playersIn.length;i++){
-            let res = await getUser(players[i])
+            let res = await getUser(playersIn[i])
             let user = await res.json()
-
             if(user.stillIn){
               setUserCount(user.card_count)
                 // setPlayersIn((prevPlayersIn) => [...prevPlayersIn, user.username]);
@@ -122,7 +123,7 @@ const Game = () =>{
 
 
   useEffect(() => {
-    const ws = new WebSocket('ws://localhost:8080'); // Replace 'example.com/socket' with your server's WebSocket endpoint
+    const ws = new WebSocket('ws://localhost:10000'); // Replace 'example.com/socket' with your server's WebSocket endpoint
 
     ws.onopen = () => {
       console.log('WebSocket connection established');
@@ -142,6 +143,9 @@ const Game = () =>{
                 let res= await getHand(code)
                 let result = await res.json();
                 setHand(result)
+                let resP = await getIn(code)
+                let playersIn = await resP.json()
+                setPlayerList(playersIn)
                 console.log(hand)
             } else if(parse[1]==='next user'){
               // console.log(parse[2])
@@ -260,7 +264,7 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
             }
         }
         await addHand(code,selectedHand.name,card1,card2,suit)
-        if(userTurn+1>=playersIn.length){
+        if(userTurn+1>=playerList.length){
           // console.log('reset')
           await updateTurn(0,code);
         } else {
@@ -328,29 +332,29 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
         }
       }
 
-      const checkHigh = (dealt) => {
+      const checkHigh = async (dealt) => {
         console.log(hand[1])
         for(let i=0;i<dealt.length;i++){
             if(dealt[i].length===3){
                 if(dealt[i][0]===hand[1][0] && dealt[i][1]===hand[1][1] && dealt[i][2]===hand[3][0]){
                     console.log('pass')
-                    addtoCount('pass')
+                    await addtoCount('pass')
 
                     return
                 }
             }else{
                 if(dealt[i][0]===hand[1][0] && dealt[i][1]===hand[3][0]){
                     console.log('pass')
-                    addtoCount('pass')
+                    await addtoCount('pass')
 
                     return
                 }
             }
       }
       console.log('fail')
-      addtoCount('fail')
+      await addtoCount('fail')
     }
-    const checkMulti = (dealt,handCheck) => {
+    const checkMulti = async (dealt,handCheck) => {
         let obj={};
         for(let i=0;i<dealt.length;i++){
             if(dealt[i].length===3){
@@ -370,122 +374,122 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
         if(handCheck==='Pair'){
             if(hand[1]===10){
                 if(obj[hand[1][1]]>=2){
-                    addtoCount('pass')
+                    await addtoCount('pass')
                     console.log('pass')
                 } else {
                     console.log('fail')
-                    addtoCount('fail')
+                    await addtoCount('fail')
                 }
             } else{
                 if(obj[hand[1][0]]>=2){
                 console.log('pass')
                 } else {
                     console.log('fail')
-                    addtoCount('fail')
+                    await addtoCount('fail')
                 }
             }
         } else if(handCheck==='Two'){
             if(hand[1]===10){
                 if(obj[hand[1][1]]>=2 && obj[hand[2][0]]>=2){
                     console.log('pass')
-                    addtoCount('pass')
+                    await addtoCount('pass')
 
                 } else {
                     console.log('fail')
-                    addtoCount('fail')
+                    await ddtoCount('fail')
                 }
             }else if(hand[2]===10){
                 if(obj[hand[1][0]]>=2 && obj[hand[2][1]]>=2){
                     console.log('pass')
-                    addtoCount('pass')
+                    await addtoCount('pass')
 
                 } else {
                     console.log('fail')
-                    addtoCount('fail')
+                    await addtoCount('fail')
                 }
             }  
             else{
                 if(obj[hand[1][0]]>=2 && obj[hand[2][0]]>=2){
                 console.log('pass')
-                addtoCount('pass')
+                await addtoCount('pass')
 
                 } else {
                     console.log('fail')
-                    addtoCount('fail')
+                    await addtoCount('fail')
                 }
             }
         } else if(handCheck==='Three'){
             if(hand[1]===10){
                 if(obj[hand[1][1]]>=3){
                     console.log('pass')
-                    addtoCount('pass')
+                    await addtoCount('pass')
 
                 } else {
                     console.log('fail')
-                    addtoCount('fail')
+                    await addtoCount('fail')
                 }
             } else{
                 if(obj[hand[1][0]]>=3){
                 console.log('pass')
-                addtoCount('pass')
+                await addtoCount('pass')
 
                 } else {
                     console.log('fail')
-                    addtoCount('fail')
+                    await addtoCount('fail')
                 }
             }
         } else if(handCheck==='Full'){
             if(hand[1]===10){
                 if(obj[hand[1][1]]>=3 && obj[hand[2][0]]>=2){
                     console.log('pass')
-                    addtoCount('pass')
+                    await addtoCount('pass')
 
                 } else {
                     console.log('fail')
-                    addtoCount('fail')
+                    await addtoCount('fail')
                 }
             }else if(hand[2]===10){
                 if(obj[hand[1][0]]>=3 && obj[hand[2][1]]>=2){
                     console.log('pass')
-                    addtoCount('pass')
+                    await addtoCount('pass')
 
                 } else {
                     console.log('fail')
-                    addtoCount('fail')
+                    await addtoCount('fail')
                 }
             } else{
                 if(obj[hand[1][0]]>=3 && obj[hand[2][0]]>=2){
                 console.log('pass')
-                addtoCount('pass')
+                await addtoCount('pass')
 
                 } else {
                     console.log('fail')
-                    addtoCount('fail')
+                    await addtoCount('fail')
                 }
             }
         }else {
             if(hand[1]===10){
                 if(obj[hand[1][1]]>=4){
                     console.log('pass')
-                    addtoCount('pass')
+                    await addtoCount('pass')
 
                 } else {
                     console.log('fail')
-                    addtoCount('fail')
+                    await addtoCount('fail')
                 }
             } else{
                 if(obj[hand[1][0]]>=4){
                 console.log('pass')
-                addtoCount('pass')
+                await addtoCount('pass')
 
                 } else {
                     console.log('fail')
-                    addtoCount('fail')
+                    await addtoCount('fail')
                 }
             }
         }
     }
-      const checkFlush = (dealt) => {
+      const checkFlush = async (dealt) => {
         let obj={};
         for(let i=0;i<dealt.length;i++){
             if(dealt[i].length===3){
@@ -504,14 +508,14 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
         }
         if(obj[hand[3][0]]>=5){
             console.log('pass')
-            addtoCount('pass')
+            await addtoCount('pass')
 
         } else {
             console.log('fail')
-            addtoCount('fail')
+            await addtoCount('fail')
         }
       }
-      const checkStraight = (dealt) => {
+      const checkStraight = async (dealt) => {
         let obj={};
         for(let i=0;i<dealt.length;i++){
             if(dealt[i].length===3){
@@ -533,23 +537,23 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
             if(i===10){
                 if(!obj[0]){
                     console.log('fail')
-                    addtoCount('fail')
+                    await addtoCount('fail')
                     return;
                 }
             } else {
                 if(!obj[allCards[i]]){
                     console.log('fail')
-                    addtoCount('fail')
+                    await addtoCount('fail')
                     return;
                 }
             }
         }
         console.log("pass")
-        addtoCount('pass')
+        await addtoCount('pass')
 
       }
 
-      const checkStraightFlush = (dealt) => {
+      const checkStraightFlush = async (dealt) => {
         let obj={};
         for(let i=0;i<dealt.length;i++){
              obj[dealt[i]]=1
@@ -559,40 +563,70 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
             console.log(allCards[i]+hand[3][0])
             if(!obj[allCards[i]+hand[3][0]]){
                 console.log('fail')
-                addtoCount('fail')
+                await addtoCount('fail')
                 return
             }
         }
         console.log('pass')
-        addtoCount('fail')
+        await addtoCount('fail')
 
     }
 
 
     const addtoCount= async (ans) => {
+        let res= await getIn(code);
+        let playersIn = await res.json();
+        let one=false;
         if(ans==='pass'){
             let res= await addCount(playersIn[userTurn],maxCards);
             let resjson = await res.json();
+            console.log(resjson)
             if(resjson==='remove'){
-                setPlayersIn(prevPlayersIn => prevPlayersIn.filter(player => player !== playersIn[userTurn]))
+                console.log('test remover')
+                let result=playersIn.filter(player => player !== playersIn[userTurn])
+                console.log(result)
+                if(result.length===1){
+                    one=true;
+                }
+                await setPlayersIn(result,code)
             }
         } else {
             if(userTurn===0){
                 console.log(playersIn[playersIn.length-1])
                 let res= await addCount(playersIn[playersIn.length-1],maxCards);
                 let resjson = await res.json();
+                console.log(resjson)
                 if(resjson==='remove'){
-                    setPlayersIn(prevPlayersIn => prevPlayersIn.filter(player => player !== playersIn[playersIn.length-1]))
+                    console.log('tes t remove ')
+                    let result = playersIn.filter(player => player !== playersIn[playersIn.length-1])
+                    console.log(result)
+                    if(result.length===1){
+                        one=true;
+                    }
+                    await setPlayersIn(result,code)
                 }
             } else {
                 let res= await addCount(playersIn[userTurn-1],maxCards);
                 let resjson = await res.json();
+                console.log(resjson)
                 if(resjson==='remove'){
-                    setPlayersIn(prevPlayersIn => prevPlayersIn.filter(player => player !== playersIn[userTurn-1]))
+                    console.log('test remove')
+                    let result = playersIn.filter(player => player !== playersIn[userTurn-1])
+                    console.log(result)
+                    if(result.length===1){
+                        one=true;
+                    }
+                    await setPlayersIn(result,code)
                 }
             }
         }
-        if(playersIn.length===1){
+
+        res= await getIn(code);
+        playersIn = await res.json();
+        console.log(playersIn)
+        setPlayerList(playersIn);
+
+        if(one){
             const message = [code, 'winner', playersIn];
             sendMessage(JSON.stringify(message));
         } else {
@@ -600,20 +634,22 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
             sendMessage(JSON.stringify(message));
             resetCards();
         }
-
-    }
+    }   
 
     const resetCards = async() =>{
+        let res= await getIn(code);
+        let playersIn = await res.json();
         await resetCardsDealt(code);
         for(let i=0;i<playersIn.length;i++){
             await resetCardsPlayer(playersIn[i]);
         }
+
         await dealCards();
         // const message = [code,'round over'];
         // sendMessage(JSON.stringify(message))
         await getHands();
         await getTurn();
-        let res= await getHand(code)
+         res= await getHand(code)
         let result = await res.json();
         setHand(result)
     }
@@ -650,7 +686,7 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
             </ul>
             {hand[0] ? <button type='submit' onClick={handleBS}>Call B.S.</button> : null}
             <>
-            {playersIn[userTurn]===cookies.sessionId ? (
+            {playerList[userTurn]===cookies.sessionId ? (
               <>
             <p>your turn {userTurn}</p>
             <div className="card-body m-5">
@@ -795,7 +831,7 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
         </div>
         </>
             ) : (
-            <p>{playersIn[userTurn]} turn {userTurn}</p>
+            <p>{playerList[userTurn]} turn {userTurn}</p>
             )}
             </>
             </>
