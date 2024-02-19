@@ -31,7 +31,7 @@ db.once('open', () => {
 
 const WebSocket = require('ws');
 
-const wss = new WebSocket.Server({ port: 10000 }); // Replace 8080 with the desired port number
+const wss = new WebSocket.Server({ port: 8080 }); // Replace 8080 with the desired port number
 
 // Store the connected clients
 const clients = new Set();
@@ -60,9 +60,7 @@ wss.on('connection', (ws) => {
       });
     } else if(parse[1]==='players'){
       clients.forEach((client) => {
-        if (client !== ws && client.readyState === WebSocket.OPEN) {
           client.send(messageString);
-        }
       });
     } else if(parse[1]==='winner'){
       clients.forEach((client) => {

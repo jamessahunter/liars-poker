@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 import { getRoomUser, getUser, addCard, getUserTurn, updateTurn, addDealt, getDealt, addHand, getHand,
 addCount, resetCardsDealt, resetCardsPlayer, setPlayersIn, getIn } from '../utils/api';
-
+import Modal from 'react-modal';
 
 
 const Game = () =>{
@@ -17,6 +17,7 @@ const Game = () =>{
     const [userCount, setUserCount] = useState(2);
     const [maxCards, setMaxCards] = useState();
     const [winner, setWinner] = useState();
+    const [allHands, setAllHands] = useState([]);
     let code = window.location.toString().split('/')[
         window.location.toString().split('/').length-1
     ];
@@ -123,7 +124,7 @@ const Game = () =>{
 
 
   useEffect(() => {
-    const ws = new WebSocket('ws://localhost:10000'); // Replace 'example.com/socket' with your server's WebSocket endpoint
+    const ws = new WebSocket('ws://localhost:8080'); // Replace 'example.com/socket' with your server's WebSocket endpoint
 
     ws.onopen = () => {
       console.log('WebSocket connection established');
@@ -160,10 +161,12 @@ const Game = () =>{
               setSelected('None')
             } else if(parse[1]==='players'){
                 setPlayersIn(parse[2])
+                // setUserTurn(parse[3])
+                setAllHands(parse[3])
                 getHands();
 
             } else if(parse[1]==='winner'){
-                setWinner(parse[2][0])
+                setWinner(parse[2])
             }
         }
     };
@@ -292,6 +295,8 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
       const handleClickCard = ()=>{
         getHands()
       }
+
+      
 
       const handleBS = async ()=>{
         console.log('BS')
@@ -577,12 +582,14 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
         let res= await getIn(code);
         let playersIn = await res.json();
         let one=false;
+        // let turn;
         if(ans==='pass'){
             let res= await addCount(playersIn[userTurn],maxCards);
             let resjson = await res.json();
             console.log(resjson)
+            // turn=userTurn;
             if(resjson==='remove'){
-                console.log('test remover')
+                // console.log('test remover')
                 let result=playersIn.filter(player => player !== playersIn[userTurn])
                 console.log(result)
                 if(result.length===1){
@@ -596,8 +603,9 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
                 let res= await addCount(playersIn[playersIn.length-1],maxCards);
                 let resjson = await res.json();
                 console.log(resjson)
+                await updateTurn(playersIn[playersIn.length-1],code)
                 if(resjson==='remove'){
-                    console.log('tes t remove ')
+                    // console.log('tes t remove ')
                     let result = playersIn.filter(player => player !== playersIn[playersIn.length-1])
                     console.log(result)
                     if(result.length===1){
@@ -609,8 +617,9 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
                 let res= await addCount(playersIn[userTurn-1],maxCards);
                 let resjson = await res.json();
                 console.log(resjson)
+                updateTurn(userTurn-1,code)
                 if(resjson==='remove'){
-                    console.log('test remove')
+                    // console.log('test remove')
                     let result = playersIn.filter(player => player !== playersIn[userTurn-1])
                     console.log(result)
                     if(result.length===1){
@@ -625,16 +634,28 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
         playersIn = await res.json();
         console.log(playersIn)
         setPlayerList(playersIn);
-
+        let hands= await userCards()
         if(one){
             const message = [code, 'winner', playersIn];
             sendMessage(JSON.stringify(message));
         } else {
-            const message = [code, 'players',playersIn];
+            const message = [code, 'players',playersIn,hands];
             sendMessage(JSON.stringify(message));
             resetCards();
         }
     }   
+
+    const userCards= async() =>{
+        let res= await getIn(code);
+        let playersIn = await res.json();
+        const cards=[];
+        for(let i=0;i<playersIn.length;i++){
+            let handRes= await getUser(playersIn[i]);
+            let result= await handRes.json()
+            cards.push([result.username, result.cards])
+        }
+        return cards;
+    }
 
     const resetCards = async() =>{
         let res= await getIn(code);
@@ -653,6 +674,17 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
         let result = await res.json();
         setHand(result)
     }
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const openModal = () => {
+        setIsModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+    };
+
 
     return (
         <>
@@ -673,6 +705,7 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
                 )}
             </ul>
             <button type='submit' onClick={handleButtonClick}>Start Game</button>
+
             </>
         ) : (
             <>
@@ -684,6 +717,17 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
               <li>{card}</li>
             ))}
             </ul>
+            <button onClick={openModal}>Open Modal</button>
+            <Modal isOpen={isModalOpen} onClose={closeModal}>
+                <h2>Modal Content</h2>
+                <p>This is the content of the modal.</p>
+                <ul>
+                    {allHands.map((hand)=>(
+                        <li>{hand}</li>
+                    ))}
+                </ul>
+                <button onClick={closeModal}>Close Modal</button>
+            </Modal>
             {hand[0] ? <button type='submit' onClick={handleBS}>Call B.S.</button> : null}
             <>
             {playerList[userTurn]===cookies.sessionId ? (
