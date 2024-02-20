@@ -129,7 +129,7 @@ const Game = () =>{
 
 
   useEffect(async() => {
-    const ws = new WebSocket('http://localhost:8080'); // Replace 'example.com/socket' with your server's WebSocket endpoint
+    const ws = new WebSocket('ws://localhost:8080'); // Replace 'example.com/socket' with your server's WebSocket endpoint
     // await pusher.init({
     //     apiKey: "536cdade0e1860d0eda7",
     //     cluster: "us3"

@@ -8,6 +8,7 @@ const Pusher = require('pusher-js')
 const routes = require('./routes');
 
 const PORT = process.env.PORT || 3001;
+const PORT2 =process.env.PORT2 || 8080;
 const app = express();
 const server = require('http').Server(app);
   
@@ -75,8 +76,8 @@ wss.on('connection', (ws) => {
   });
 });
 
-server.listen(8080, function () {
-  console.log('Listening on http://localhost:8080');
+server.listen(PORT2, function () {
+  console.log(`Listening on http://localhost:${PORT2}`);
 });
 
 // const pusher = new Pusher({
