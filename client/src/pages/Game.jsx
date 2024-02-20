@@ -132,7 +132,7 @@ const Game = () =>{
 
 
   useEffect(async() => {
-    const ws = new WebSocket('ws://localhost:3001'); // Replace 'example.com/socket' with your server's WebSocket endpoint
+    const ws = new WebSocket('ws://localhost:10000'); // Replace 'example.com/socket' with your server's WebSocket endpoint
     // socket.on('connect', () => {
     //     console.log('Connected to server');
     // });
