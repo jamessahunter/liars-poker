@@ -33,7 +33,7 @@ db.once('open', () => {
 const WebSocket = require('ws');
 const { constants } = require('buffer');
 
-const wss = new WebSocket.Server({ server }); // Replace 8080 with the desired port number
+const wss = new WebSocket.Server({ port: PORT2 }); // Replace 8080 with the desired port number
 
 // Store the connected clients
 const clients = new Set();
@@ -76,9 +76,9 @@ wss.on('connection', (ws) => {
   });
 });
 
-server.listen(PORT2, function () {
-  console.log(`Listening on http://localhost:${PORT2}`);
-});
+// server.listen(PORT2, function () {
+//   console.log(`Listening on http://localhost:${PORT2}`);
+// });
 
 // const pusher = new Pusher({
 //   appId: "1758469",
