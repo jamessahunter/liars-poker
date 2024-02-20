@@ -3,7 +3,9 @@ import { useParams, Link } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 import { getRoomUser, getUser, addCard, getUserTurn, updateTurn, addDealt, getDealt, addHand, getHand,
 addCount, resetCardsDealt, resetCardsPlayer, setPlayersIn, getIn } from '../utils/api';
-import Modal from 'react-modal';
+import Modal from 'react-modal'
+import Pusher from 'pusher-js';
+// import { pusherConfig } from './pusherConfig';
 
 
 const Game = () =>{
@@ -21,6 +23,9 @@ const Game = () =>{
     let code = window.location.toString().split('/')[
         window.location.toString().split('/').length-1
     ];
+    // const pusher = Pusher.getInstance();
+
+
     const cards={};
     const cardsArr=['2C', '3C', '4C', '5C', '6C', '7C', '8C', '9C', '10C', 'JC', 'QC', 'KC', 'AC',
     '2D', '3D', '4D', '5D', '6D', '7D', '8D', '9D', '10D', 'JD', 'QD', 'KD', 'AD',
@@ -123,9 +128,27 @@ const Game = () =>{
     }
 
 
-  useEffect(() => {
+  useEffect(async() => {
     const ws = new WebSocket('ws://localhost:8080'); // Replace 'example.com/socket' with your server's WebSocket endpoint
+    // await pusher.init({
+    //     apiKey: "536cdade0e1860d0eda7",
+    //     cluster: "us3"
+    //   });
+        
+    //   const pusher = new Pusher('536cdade0e1860d0eda7', {
+    //         cluster: 'us3'
+    //     });
 
+    //     const channel = pusher.subscribe('chat-channel');
+
+    //     channel.bind('new-message', data => {
+    //         console.log('New message received:', data);
+    //         // Update your UI with the new message data
+    //     });
+
+    //     return () => {
+    //         pusher.unsubscribe('chat-channel');
+    //     };
     ws.onopen = () => {
       console.log('WebSocket connection established');
     };
@@ -213,7 +236,9 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
         }
         // console.log(selectedHand);
         // console.log(chosenHandNum);
-        // console.log(hand[3])
+        console.log(hand[1])
+        console.log(card1);
+        console.log((hand[1]>=card1))
         // console.log(suits.indexOf(hand[3]))
         if(hand[0]){
             console.log('check')
@@ -229,14 +254,14 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
                 console.log('higher suit needed')
                 return;
             }
-            if(hand[1]>=card1 && suits.indexOf(hand[3])===suits.indexOf(suit) && selectedHand.name!=='Flush'){
+            if(allCards.indexOf(hand[1])>=allCards.indexOf(card1) && suits.indexOf(hand[3])===suits.indexOf(suit) && selectedHand.name!=='Flush'){
                 console.log('select higher card')
                 return;
             }
         }
             if(selectedHand.name ==='Two Pair' || selectedHand.name === 'Full House'){
-                if(allCards.indexOf(card1)==allCards.indexOf(card2)){
-                    console.log('cards must not be the same')
+                if(allCards.indexOf(card1)<=allCards.indexOf(card2)){
+                    console.log('cards must not be the same or card 1 less than card 2')
                     return;
                 }
             }

@@ -3,7 +3,7 @@ const express = require('express');
 const path = require('path');
 
 const db = require('./config/connection');
-
+const Pusher = require('pusher-js')
 // Comment out this code once you have built out queries and mutations in the client folder
 const routes = require('./routes');
 
@@ -30,8 +30,9 @@ db.once('open', () => {
 });
 
 const WebSocket = require('ws');
+const { constants } = require('buffer');
 
-const wss = new WebSocket.Server({ port: 8080 }); // Replace 8080 with the desired port number
+const wss = new WebSocket.Server({ server }); // Replace 8080 with the desired port number
 
 // Store the connected clients
 const clients = new Set();
@@ -74,5 +75,27 @@ wss.on('connection', (ws) => {
   });
 });
 
+server.listen(8080, function () {
+  console.log('Listening on http://localhost:8080');
+});
 
+// const pusher = new Pusher({
+//   appId: "1758469",
+//   key: "536cdade0e1860d0eda7",
+//   secret: "8d414a1e4cd2ffed9e4c",
+//   cluster: "us3",
+// });
 
+// pusher.trigger("my-channel", "my-event", {
+//   message: "hello world"
+// });
+
+// app.post('/send-message', (req, res) => {
+//   const { message } = req.body;
+
+//   pusher.trigger('chat-channel', 'new-message', {
+//       message,
+//   });
+
+//   res.status(200).send('Message sent');
+// });
