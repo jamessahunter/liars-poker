@@ -5,7 +5,10 @@ import { getRoomUser, getUser, addCard, getUserTurn, updateTurn, addDealt, getDe
 addCount, resetCardsDealt, resetCardsPlayer, setPlayersIn, getIn } from '../utils/api';
 import Modal from 'react-modal'
 import Pusher from 'pusher-js';
-// import { pusherConfig } from './pusherConfig';
+// import io from 'socket.io-client';
+
+// const socket = io('http://localhost:3001');
+// // import { pusherConfig } from './pusherConfig';
 
 
 const Game = () =>{
@@ -129,29 +132,18 @@ const Game = () =>{
 
 
   useEffect(async() => {
-    const ws = new WebSocket('ws://localhost:8080'); // Replace 'example.com/socket' with your server's WebSocket endpoint
-    // await pusher.init({
-    //     apiKey: "536cdade0e1860d0eda7",
-    //     cluster: "us3"
-    //   });
-        
-    //   const pusher = new Pusher('536cdade0e1860d0eda7', {
-    //         cluster: 'us3'
-    //     });
+    const ws = new WebSocket('ws://localhost:3001'); // Replace 'example.com/socket' with your server's WebSocket endpoint
+    // socket.on('connect', () => {
+    //     console.log('Connected to server');
+    // });
 
-    //     const channel = pusher.subscribe('chat-channel');
+    // socket.on('disconnect', () => {
+    //     console.log('Disconnected from server');
+    // });
 
-    //     channel.bind('new-message', data => {
-    //         console.log('New message received:', data);
-    //         // Update your UI with the new message data
-    //     });
-
-    //     return () => {
-    //         pusher.unsubscribe('chat-channel');
-    //     };
-    ws.onopen = () => {
-      console.log('WebSocket connection established');
-    };
+    // ws.onopen = () => {
+    //   console.log('WebSocket connection established');
+    // };
 
     ws.onmessage = async (event) => {
         // console.log('messae')
