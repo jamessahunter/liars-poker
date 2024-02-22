@@ -143,18 +143,18 @@ const Game = () =>{
 
 
   useEffect(async() => {
-    await pusher.init({
-        apiKey: "536cdade0e1860d0eda7",
-        cluster: "us3"
-      });
+    // await pusher.init({
+    //     apiKey: "536cdade0e1860d0eda7",
+    //     cluster: "us3"
+    //   });
         
-      await pusher.connect();
-      await pusher.subscribe({
-        channelName: "liars-poker", 
-        onEvent: (event) => {
-          console.log(`Event received: ${event}`);
-        }
-      });
+    //   await pusher.connect();
+    //   await pusher.subscribe({
+    //     channelName: "liars-poker", 
+    //     onEvent: (event) => {
+    //       console.log(`Event received: ${event}`);
+    //     }
+    //   });
     const ws = new WebSocket('ws://liars-poker.onrender.com/');
     // const ws = new WebSocket('ws://localhost:8080/') // Replace 'example.com/socket' with your server's WebSocket endpoint
     // function onConnect() {
