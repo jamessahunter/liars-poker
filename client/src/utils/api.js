@@ -240,3 +240,22 @@ export const getIn = (code) => {
     },
   })
 }
+
+export const setRoomStarted = (code) => {
+  return fetch(`/api/room/started/${code}`,{
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: `{"started" : "true"}`,
+  })
+}
+
+export const getRoomStarted = (code) => {
+  return fetch(`/api/room/started/${code}`,{
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+}

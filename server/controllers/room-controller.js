@@ -140,5 +140,17 @@ module.exports = {
         res.status(200).json('players in set')
         },
 
-        
+        async setRoomStarted(req,res){
+          const room = await Room.findOneAndUpdate(
+            {room: req.params.code},
+            {$set: {started: req.body}},
+            {new: true})
+            res.status(200).json('room started')
+        },
+
+        async getRoomStarted(req,res) {
+          const room= await Room.findOne({room: req.params.code})
+          console.log(room.started)
+          return res.json(room.started)
+        },
 }

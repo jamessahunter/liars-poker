@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 import { Link } from 'react-router-dom';
-import { createUser, getAllUser, createRoom, addUser, AnotherUser } from '../utils/api';
+import { createUser, getAllUser, createRoom, addUser, AnotherUser, getRoomStarted } from '../utils/api';
 import UserHand from './UserHand';
 import Lobby from './Lobby';
 import Game from './Game';

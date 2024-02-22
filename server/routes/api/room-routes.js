@@ -13,7 +13,8 @@ const {
     getHand,
     resetCardsDealt,
     setPlayersIn,
-
+    setRoomStarted,
+    getRoomStarted
 
 } = require('../../controllers/room-controller')
 
@@ -30,5 +31,6 @@ router.route('/dealt/:code').get(getDealt)
 router.route('/hand/:code').get(getHand)
 router.route('/reset/:code').put(resetCardsDealt)
 router.route('/playersIn/:code').put(setPlayersIn)
-
+router.route('/started/:code').put(setRoomStarted)
+router.route('/started/:code').get(getRoomStarted)
 module.exports = router;

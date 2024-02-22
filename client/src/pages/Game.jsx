@@ -2,27 +2,19 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 import { getRoomUser, getUser, addCard, getUserTurn, updateTurn, addDealt, getDealt, addHand, getHand,
-addCount, resetCardsDealt, resetCardsPlayer, setPlayersIn, getIn } from '../utils/api';
+addCount, resetCardsDealt, resetCardsPlayer, setPlayersIn, getIn, setRoomStarted } from '../utils/api';
 import Modal from 'react-modal'
-import pusher from 'pusher-js';
-// import io from 'socket.io-client';
-// import { io } from 'socket.io-client';
-// import {
-//     Pusher,
-//     PusherMember,
-//     PusherChannel,
-//     PusherEvent,
-//   } from '@pusher/pusher-websocket-react-native';
-// "undefined" means the URL will be computed from the `window.location` object
-// const URL = process.env.NODE_ENV === 'production' ? undefined : 'http://localhost:80';
-
-// export const socket = io(URL);
-// const socket = io('http://localhost:3001');
-// // import { pusherConfig } from './pusherConfig';
 
 
 const Game = () =>{
 
+    const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}, {name:'Two Pair',num:3}, {name:'Three of a Kind',num:4},
+    {name:'Flush',num:5}, {name:'Straight',num:6}, {name:'Full House',num:7}, {name:'Four of a Kind',num:8},
+    {name:'Straight Flush',num:9}, {name:'Royal Flush',num:10}];
+    const allCards = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+    const suits = ['Clubs', 'Daimonds', 'Hearts', 'Spades'];
+    const [hand, setHand] = useState('None');
+    const [selected, setSelected] = useState('None');
     const [cookies, setCookie, removeCookie] = useCookies(['sessionId']);
     const [players, setPlayers] = useState([]);
     const [userHand, setUserHand] = useState([]);
@@ -33,12 +25,11 @@ const Game = () =>{
     const [maxCards, setMaxCards] = useState();
     const [winner, setWinner] = useState();
     const [allHands, setAllHands] = useState([]);
+    const [passorFail, setPassorFail] = useState();
+    const [handCalled, setHandCalled] = useState();
     let code = window.location.toString().split('/')[
         window.location.toString().split('/').length-1
     ];
-    // const pusher = Pusher.getInstance();
-    // const [isConnected, setIsConnected] = useState(socket.connected);
-    const [fooEvents, setFooEvents] = useState([]);
 
     const cards={};
     const cardsArr=['2C', '3C', '4C', '5C', '6C', '7C', '8C', '9C', '10C', 'JC', 'QC', 'KC', 'AC',
@@ -54,6 +45,7 @@ const Game = () =>{
         },[players])
     useEffect(() => {
         console.log("test")
+        getHands();
     }, [userTurn]);
     useEffect(()=>{
         console.log(started)
@@ -143,36 +135,8 @@ const Game = () =>{
 
 
   useEffect(async() => {
-    // await pusher.init({
-    //     apiKey: "536cdade0e1860d0eda7",
-    //     cluster: "us3"
-    //   });
-        
-    //   await pusher.connect();
-    //   await pusher.subscribe({
-    //     channelName: "liars-poker", 
-    //     onEvent: (event) => {
-    //       console.log(`Event received: ${event}`);
-    //     }
-    //   });
-    const ws = new WebSocket('wss://liars-poker.onrender.com/');
-    // const ws = new WebSocket('ws://localhost:8080/') // Replace 'example.com/socket' with your server's WebSocket endpoint
-    // function onConnect() {
-    //     console.log('connected')
-    //     setIsConnected(true);
-    //   }
-  
-    //   function onDisconnect() {
-    //     setIsConnected(false);
-    //   }
-  
-    //   function onFooEvent(value) {
-    //     setFooEvents(previous => [...previous, value]);
-    //   }
-  
-    //   socket.on('connect', onConnect);
-    //   socket.on('disconnect', onDisconnect);
-    //   socket.on('foo', onFooEvent);
+    // const ws = new WebSocket('wss://liars-poker.onrender.com/');
+    const ws = new WebSocket('ws://localhost:3001/') // Replace 'example.com/socket' with your server's WebSocket endpoint
 
     ws.onmessage = async (event) => {
         // console.log('messae')
@@ -205,10 +169,11 @@ const Game = () =>{
               setSelected('None')
             } else if(parse[1]==='players'){
                 setPlayersIn(parse[2])
-                // setUserTurn(parse[3])
+                setPassorFail(parse[4])
                 setAllHands(parse[3])
+                setHandCalled(parse[5])
                 getHands();
-
+                await getTurn();
             } else if(parse[1]==='winner'){
                 setWinner(parse[2])
             }
@@ -233,13 +198,7 @@ const Game = () =>{
     }
   };
 
-const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}, {name:'Two Pair',num:3}, {name:'Three of a Kind',num:4},
-    {name:'Flush',num:5}, {name:'Straight',num:6}, {name:'Full House',num:7}, {name:'Four of a Kind',num:8},
-    {name:'Straight Flush',num:9}, {name:'Royal Flush',num:10}];
-    const allCards = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
-    const suits = ['Clubs', 'Daimonds', 'Hearts', 'Spades'];
-    const [hand, setHand] = useState('None');
-    const [selected, setSelected] = useState('None');
+
     const handleFormSubmit = async (event) => {
         event.preventDefault();
         let card1=event.target.card1.value
@@ -257,9 +216,9 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
         }
         // console.log(selectedHand);
         // console.log(chosenHandNum);
-        console.log(hand[1])
-        console.log(card1);
-        console.log((hand[1]>=card1))
+        // console.log(hand[1])
+        // console.log(card1);
+        // console.log((hand[1]>=card1))
         // console.log(suits.indexOf(hand[3]))
         if(hand[0]){
             console.log('check')
@@ -685,7 +644,7 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
             const message = [code, 'winner', playersIn];
             sendMessage(JSON.stringify(message));
         } else {
-            const message = [code, 'players',playersIn,hands];
+            const message = [code, 'players',playersIn,hands,ans,hand];
             sendMessage(JSON.stringify(message));
             resetCards();
         }
@@ -758,15 +717,16 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
             <div>started</div>
             <p>{hand}</p>
             <ul>
-            {userCount!== userHand.length ? <button onClick={handleClickCard} >Click to get Cards</button> :
-            userHand.map((card) => (
+            
+            {userHand.map((card) => (
               <li>{card}</li>
             ))}
             </ul>
-            <button onClick={openModal}>Open Modal</button>
+            <button onClick={handleClickCard} >Get Cards</button>
+            <button onClick={openModal}>See Previous Rounds Cards</button>
             <Modal isOpen={isModalOpen} onClose={closeModal}>
-                <h2>Modal Content</h2>
-                <p>This is the content of the modal.</p>
+                <h2>{passorFail}</h2>
+                <h3>{handCalled}</h3>
                 <ul>
                     {allHands.map((hand)=>(
                         <li>{hand}</li>
@@ -774,11 +734,12 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
                 </ul>
                 <button onClick={closeModal}>Close Modal</button>
             </Modal>
-            {hand[0] ? <button type='submit' onClick={handleBS}>Call B.S.</button> : null}
+            
             <>
             {playerList[userTurn]===cookies.sessionId ? (
               <>
             <p>your turn {userTurn}</p>
+            {hand[0] ? <button type='submit' onClick={handleBS}>Call B.S.</button> : null}
             <div className="card-body m-5">
             <form onSubmit={handleFormSubmit}>
             <label>Possible Hands: </label>
@@ -802,7 +763,7 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
                         );
                     })}
                 </select>
-                <select name="card2" value={null} disabled>
+                <select name="card2" value={undefined} disabled>
                 </select>
                 <label>Suit </label>
                 <select name="suit" >
@@ -816,7 +777,7 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
                 </select>
                 <button type='submit'>Submit</button>
                 </>
-            ) : null}
+            ) : undefined}
             {(selected==='Pair' || selected==='Three of a Kind'|| selected==='Four of a Kind') ? (
                 <>
                 <select name="card1" >
@@ -828,14 +789,14 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
                         );
                     })}
                 </select>
-                <select name="card2" value={null} disabled>
+                <select name="card2" value={undefined} disabled>
                 </select>
                 <label>Suit </label>
-                <select name="suit" value={null} disabled>
+                <select name="suit" value={undefined} disabled>
                 </select>
                 <button type='submit'>Submit</button>
                 </>
-            ) : null}
+            ) : undefined}
             {(selected === 'Two Pair' || selected === 'Full House' || selected ==='Straight') ? (
                 <>
                 <label>Top Card, Three of a Kind</label>
@@ -858,16 +819,16 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
                     );
                 })}
                 </select>
-                <select name="suit" value={null} disabled>
+                <select name="suit" value={undefined} disabled>
                 </select>
                 <button type='submit'>Submit</button>
                 </>
-            ): null}
+            ): undefined}
             {selected==='Flush' ?
             <>
-             <select name="card1" value={null} disabled>
+             <select name="card1" value={undefined} disabled>
             </select>
-            <select name="card2" value={null} disabled>
+            <select name="card2" value={undefined} disabled>
                 </select>
             <label>Suit </label>
             <select name="suit" >
@@ -881,7 +842,7 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
             </select>
             <button type='submit'>Submit</button>
             </>
-            : null}
+            : undefined}
             {selected ==='Straight Flush'|| selected==='Royal Flush' ?
             <>
             <label>Top Card </label>
@@ -916,7 +877,7 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
             </select>
             <button type='submit'>Submit</button>
             </>
-        : null}
+        : undefined}
             </form>
         </div>
         </>
@@ -935,24 +896,3 @@ const hands = [{name:'None',num:0},{name:'High Card',num:1}, {name:'Pair',num:2}
  }
 
 export default Game;
-
-    // console.log(cards);
-    // let players;
-    // let userTurn=0;
-    // useEffect(() => {
-    //     console.log(playersIn);
-    //   }, [playersIn]);
-
-        // const handleNextUser = async (event) => {
-
-    //   if(userTurn+1>=playersIn.length){
-    //     // console.log('reset')
-    //     updateTurn(0,code);
-    //   } else {
-    //     // console.log('+1')
-    //     updateTurn(userTurn+1,code);
-    //   }
-    //     await getTurn();
-    //     const message = [code, 'next user',userTurn];
-    //     sendMessage(JSON.stringify(message));
-    // }
