@@ -2,13 +2,14 @@ const express = require('express');
 
 const path = require('path');
 // const {Server} = require("socket.io"); 
-const db = require('./config/connection');
+const connectDB = require('./config/connection');
 // const Pusher = require('pusher')
 // Comment out this code once you have built out queries and mutations in the client folder
 const routes = require('./routes');
 
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 8080;
 const PORT2 =process.env.PORT2 || 8080;
+connectDB();
 const app = express();
 // const server = require('http').Server(app);
   
@@ -38,9 +39,7 @@ const app = express();
   
   // io.listen(80);
 // Comment out this code once you have built out queries and mutations in the client folder
-db.once('open', () => {
-  app.listen(PORT, () => console.log(`Now listening on localhost: ${PORT}`));
-});
+const server = app.listen(PORT, () => console.log(`Now listening on localhost: ${PORT}`));
 
 // server.listen(PORT, function () {
 //   console.log(`Listening on http://localhost:${PORT}`);
@@ -49,7 +48,7 @@ db.once('open', () => {
 const WebSocket = require('ws');
 const { constants } = require('buffer');
 
-const wss = new WebSocket.Server({ port: 8080 }); // Replace 8080 with the desired port number
+const wss = new WebSocket.Server({ server }); // Replace 8080 with the desired port number
 
 // Store the connected clients
 const clients = new Set();
