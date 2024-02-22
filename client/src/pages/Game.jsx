@@ -6,7 +6,12 @@ addCount, resetCardsDealt, resetCardsPlayer, setPlayersIn, getIn } from '../util
 import Modal from 'react-modal'
 import Pusher from 'pusher-js';
 // import io from 'socket.io-client';
+import { io } from 'socket.io-client';
 
+// "undefined" means the URL will be computed from the `window.location` object
+const URL = process.env.NODE_ENV === 'production' ? undefined : 'http://localhost:80';
+
+export const socket = io(URL);
 // const socket = io('http://localhost:3001');
 // // import { pusherConfig } from './pusherConfig';
 
@@ -27,7 +32,8 @@ const Game = () =>{
         window.location.toString().split('/').length-1
     ];
     // const pusher = Pusher.getInstance();
-
+    // const [isConnected, setIsConnected] = useState(socket.connected);
+    const [fooEvents, setFooEvents] = useState([]);
 
     const cards={};
     const cardsArr=['2C', '3C', '4C', '5C', '6C', '7C', '8C', '9C', '10C', 'JC', 'QC', 'KC', 'AC',
@@ -132,18 +138,23 @@ const Game = () =>{
 
 
   useEffect(async() => {
-    const ws = new WebSocket('ws://localhost:10000'); // Replace 'example.com/socket' with your server's WebSocket endpoint
-    // socket.on('connect', () => {
-    //     console.log('Connected to server');
-    // });
-
-    // socket.on('disconnect', () => {
-    //     console.log('Disconnected from server');
-    // });
-
-    // ws.onopen = () => {
-    //   console.log('WebSocket connection established');
-    // };
+    const ws = new WebSocket('ws://localhost:8080'); // Replace 'example.com/socket' with your server's WebSocket endpoint
+    function onConnect() {
+        console.log('connected')
+        setIsConnected(true);
+      }
+  
+      function onDisconnect() {
+        setIsConnected(false);
+      }
+  
+      function onFooEvent(value) {
+        setFooEvents(previous => [...previous, value]);
+      }
+  
+      socket.on('connect', onConnect);
+      socket.on('disconnect', onDisconnect);
+      socket.on('foo', onFooEvent);
 
     ws.onmessage = async (event) => {
         // console.log('messae')
