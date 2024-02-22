@@ -155,7 +155,8 @@ const Game = () =>{
           console.log(`Event received: ${event}`);
         }
       });
-    const ws = new WebSocket('ws://liars-poker.onrender.com/'); // Replace 'example.com/socket' with your server's WebSocket endpoint
+    const ws = new WebSocket('ws://liars-poker.onrender.com/');
+    // const ws = new WebSocket('ws://localhost:8080/') // Replace 'example.com/socket' with your server's WebSocket endpoint
     // function onConnect() {
     //     console.log('connected')
     //     setIsConnected(true);
