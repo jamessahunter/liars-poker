@@ -16,9 +16,9 @@
     "concurrently": "^5.3.0"
   },
   "dependencies": {
-    "@pusher/pusher-websocket-react-native": "^1.3.1",
     "buffer": "^6.0.3",
     "modal": "^1.2.0",
+    "pusher": "^5.2.0",
     "pusher-js": "^8.4.0-rc2",
     "react-cookie": "^7.0.2",
     "react-modal": "^3.16.1",

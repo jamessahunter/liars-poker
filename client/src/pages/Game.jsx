@@ -4,14 +4,19 @@ import { useCookies } from 'react-cookie';
 import { getRoomUser, getUser, addCard, getUserTurn, updateTurn, addDealt, getDealt, addHand, getHand,
 addCount, resetCardsDealt, resetCardsPlayer, setPlayersIn, getIn } from '../utils/api';
 import Modal from 'react-modal'
-import Pusher from 'pusher-js';
+import pusher from 'pusher-js';
 // import io from 'socket.io-client';
-import { io } from 'socket.io-client';
-
+// import { io } from 'socket.io-client';
+// import {
+//     Pusher,
+//     PusherMember,
+//     PusherChannel,
+//     PusherEvent,
+//   } from '@pusher/pusher-websocket-react-native';
 // "undefined" means the URL will be computed from the `window.location` object
-const URL = process.env.NODE_ENV === 'production' ? undefined : 'http://localhost:80';
+// const URL = process.env.NODE_ENV === 'production' ? undefined : 'http://localhost:80';
 
-export const socket = io(URL);
+// export const socket = io(URL);
 // const socket = io('http://localhost:3001');
 // // import { pusherConfig } from './pusherConfig';
 
@@ -138,23 +143,35 @@ const Game = () =>{
 
 
   useEffect(async() => {
-    const ws = new WebSocket('ws://localhost:8080'); // Replace 'example.com/socket' with your server's WebSocket endpoint
-    function onConnect() {
-        console.log('connected')
-        setIsConnected(true);
-      }
+    await pusher.init({
+        apiKey: "536cdade0e1860d0eda7",
+        cluster: "us3"
+      });
+        
+      await pusher.connect();
+      await pusher.subscribe({
+        channelName: "liars-poker", 
+        onEvent: (event) => {
+          console.log(`Event received: ${event}`);
+        }
+      });
+    const ws = new WebSocket('ws://liars-poker.onrender.com/'); // Replace 'example.com/socket' with your server's WebSocket endpoint
+    // function onConnect() {
+    //     console.log('connected')
+    //     setIsConnected(true);
+    //   }
   
-      function onDisconnect() {
-        setIsConnected(false);
-      }
+    //   function onDisconnect() {
+    //     setIsConnected(false);
+    //   }
   
-      function onFooEvent(value) {
-        setFooEvents(previous => [...previous, value]);
-      }
+    //   function onFooEvent(value) {
+    //     setFooEvents(previous => [...previous, value]);
+    //   }
   
-      socket.on('connect', onConnect);
-      socket.on('disconnect', onDisconnect);
-      socket.on('foo', onFooEvent);
+    //   socket.on('connect', onConnect);
+    //   socket.on('disconnect', onDisconnect);
+    //   socket.on('foo', onFooEvent);
 
     ws.onmessage = async (event) => {
         // console.log('messae')

@@ -3,44 +3,44 @@ const express = require('express');
 const path = require('path');
 const {Server} = require("socket.io"); 
 const db = require('./config/connection');
-const Pusher = require('pusher-js')
+const Pusher = require('pusher')
 // Comment out this code once you have built out queries and mutations in the client folder
 const routes = require('./routes');
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 10000;
 const PORT2 =process.env.PORT2 || 8080;
 const app = express();
-const server = require('http').Server(app);
+// const server = require('http').Server(app);
   
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
   
   // Comment out this code once you have built out queries and mutations in the client folder
   app.use(routes);
-  app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    next();
-  });
+  // app.use((req, res, next) => {
+  //   res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+  //   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+  //   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  //   next();
+  // });
   // if we're in production, serve client/dist as static assets
   if (process.env.NODE_ENV === 'production') {
     app.use(express.static(path.join(__dirname, '../client/dist')));
 
   } // closes if (process.env.NODE_ENV === 'production') condition
 
-  const io = new Server(server,{
-    cors: {
-      origin: "http://localhost:3000",
-      methods: ["GET", "POST"],
-    }
-  });
+  // const io = new Server(server,{
+  //   cors: {
+  //     origin: "http://localhost:3000",
+  //     methods: ["GET", "POST"],
+  //   }
+  // });
   
-  io.listen(80);
+  // io.listen(80);
 // Comment out this code once you have built out queries and mutations in the client folder
-db.once('open', () => {
-  app.listen(PORT, () => console.log(`Now listening on localhost: ${PORT}`));
-});
+// db.once('open', () => {
+//   app.listen(PORT, () => console.log(`Now listening on localhost: ${PORT}`));
+// });
 
 // server.listen(PORT, function () {
 //   console.log(`Listening on http://localhost:${PORT}`);
@@ -49,7 +49,7 @@ db.once('open', () => {
 const WebSocket = require('ws');
 const { constants } = require('buffer');
 
-const wss = new WebSocket.Server({ port: 8080 }); // Replace 8080 with the desired port number
+const wss = new WebSocket.Server({ port: 10000 }); // Replace 8080 with the desired port number
 
 // Store the connected clients
 const clients = new Set();
@@ -94,7 +94,12 @@ wss.on('connection', (ws) => {
 
 
 
-// const io = require('socket.io')(server);
+const io = require('socket.io')(server,{
+  cors: {
+    origin: "http://localhost:3000",
+    // credentials: true,
+  },
+});
 // listens for when a user connects to server
 io.on('connection', (socket) => {
   console.log('A user connected Server');
@@ -115,16 +120,16 @@ io.on('connection', (socket) => {
     });
 });
 
-// const pusher = new Pusher({
-//   appId: "1758469",
-//   key: "536cdade0e1860d0eda7",
-//   secret: "8d414a1e4cd2ffed9e4c",
-//   cluster: "us3",
-// });
+const pusher = new Pusher({
+  appId: "1758469",
+  key: "536cdade0e1860d0eda7",
+  secret: "8d414a1e4cd2ffed9e4c",
+  cluster: "us3",
+});
 
-// pusher.trigger("my-channel", "my-event", {
-//   message: "hello world"
-// });
+pusher.trigger("liars-poker", "my-event", {
+  message: "hello world"
+});
 
 // app.post('/send-message', (req, res) => {
 //   const { message } = req.body;
