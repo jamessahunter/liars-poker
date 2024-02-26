@@ -15,6 +15,7 @@ const Home = () => {
   const navigate = useNavigate();
   const [cookies, setCookie, removeCookie] = useCookies(['sessionId']);
   const [userFormData, setUserFormData] = useState({ username: '', room: '' });
+  const [message, setMessage] = useState('');
   const handleButtonClick = async (event) => {
     event.preventDefault();
   // Get the id of the clicked button
@@ -27,6 +28,7 @@ const Home = () => {
     console.log(userFormData.username)
     if(userFormData.username===""){
       // console.log("test")
+      setMessage("Please enter a username")
       return
     }
     try {
@@ -38,7 +40,8 @@ const Home = () => {
       // console.log(users)
       for(let i=0;i<users.length;i++){
         if(users[i].username===userFormData.username){
-          alert("This username is already being used in this room please select another")
+          setMessage("This username is already being used in this room please select another")
+          // alert("This username is already being used in this room please select another")
           taken=true;
           return;
         }
@@ -91,10 +94,26 @@ const Home = () => {
     // Join a game logic
     if(userFormData.username===""){
       // console.log("test")
+      setMessage("Please enter a username")
+      return
+    } else if(userFormData.room===""){
+      // console.log("test")
+      setMessage("Please enter a room code or click create a game")
       return
     }
     try {
-      const res = await getAllUser(userFormData.room.toUpperCase())
+
+      let res = await getRoomStarted(userFormData.room.toUpperCase())
+      let ans = await res.json()
+      if(!res.ok){
+        setMessage(`That room doesn't exist`)
+        throw new Error('Cant get users')
+      } else if(ans===true){
+        setMessage('This game has already started')
+        return;
+      }
+
+      res = await getAllUser(userFormData.room.toUpperCase())
       if(!res.ok){
         throw new Error('Cant get users')
       }
@@ -102,11 +121,13 @@ const Home = () => {
       console.log(users)
       for(let i=0;i<users.length;i++){
         if(users[i].username===userFormData.username){
-          alert("This username is already being used in this room please select another")
+          // alert("This username is already being used in this room please select another")
+          setMessage("This username is already being used please select another")
           taken=true;
           return;
         }
       }
+      
       if(!taken) {
         try {
           const res = await createUser(userFormData.username)
@@ -140,7 +161,9 @@ const Home = () => {
   const handleInputChange = (event) => {
     const { id, value } = event.target;
     setUserFormData({ ...userFormData, [id]: value });
+    setMessage('');
   };
+
   return (
     <div className="card bg-white card-rounded w-50">
       <form>
@@ -151,9 +174,7 @@ const Home = () => {
       <input id='room'value={userFormData.room} onChange={handleInputChange}></input>
       <button type='submit'id='room' onClick={handleButtonClick}>Join a Game</button>
       </form>
-      {/* <Lobby></Lobby> */}
-      {/* <Game></Game> */}
-      {/* <UserHand></UserHand> */}
+      {message}
     </div>
   );
 };

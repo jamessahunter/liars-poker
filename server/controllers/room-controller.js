@@ -141,16 +141,20 @@ module.exports = {
         },
 
         async setRoomStarted(req,res){
+          console.log(req.body)
           const room = await Room.findOneAndUpdate(
             {room: req.params.code},
-            {$set: {started: req.body}},
+            {$set: {started: true}},
             {new: true})
             res.status(200).json('room started')
         },
 
         async getRoomStarted(req,res) {
           const room= await Room.findOne({room: req.params.code})
-          console.log(room.started)
-          return res.json(room.started)
+          // console.log(room.started)
+          if (!room) {
+            return res.status(400).json({ message: 'No room found' });
+          }
+          return res.status(200).json(room.started)
         },
 }

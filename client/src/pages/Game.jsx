@@ -88,6 +88,7 @@ const Game = () =>{
     const handleButtonClick = async (event) => {
         event.preventDefault();
         setStarted(true)
+        setRoomStarted(code);
         await setPlayersIn(players,code)
         await dealCards();
 

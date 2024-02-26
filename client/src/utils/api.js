@@ -247,7 +247,7 @@ export const setRoomStarted = (code) => {
     headers: {
       'Content-Type': 'application/json',
     },
-    body: `{"started" : "true"}`,
+    // body: `{"started" : true}`,
   })
 }
 
