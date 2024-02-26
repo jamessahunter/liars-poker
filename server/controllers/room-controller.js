@@ -155,6 +155,7 @@ module.exports = {
           if (!room) {
             return res.status(400).json({ message: 'No room found' });
           }
+          // console.log(room)
           return res.status(200).json(room.started)
         },
 }

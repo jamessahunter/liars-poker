@@ -104,7 +104,9 @@ const Home = () => {
     try {
 
       let res = await getRoomStarted(userFormData.room.toUpperCase())
+      console.log(res)
       let ans = await res.json()
+      console.log(ans)
       if(!res.ok){
         setMessage(`That room doesn't exist`)
         throw new Error('Cant get users')

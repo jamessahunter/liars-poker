@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, React } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 import { getRoomUser, getUser, addCard, getUserTurn, updateTurn, addDealt, getDealt, addHand, getHand,
-addCount, resetCardsDealt, resetCardsPlayer, setPlayersIn, getIn, setRoomStarted } from '../utils/api';
+addCount, resetCardsDealt, resetCardsPlayer, setPlayersIn, getIn, setRoomStarted, deleteUser } from '../utils/api';
 import Modal from 'react-modal'
 
 
@@ -39,6 +39,15 @@ const Game = () =>{
     for(let i=0;i<52;i++){
         cards[cardsArr[i]]=1;
     }
+    const [requestSent, setRequestSent]= useState(false);
+    window.addEventListener('beforeunload', function (event) {
+        if(!requestSent){
+            deleteUser(cookies.sessionId)
+            setRequestSent(true)
+        }
+        return;
+    });
+
 
     useEffect (() =>{
         getPlayers()

@@ -66,5 +66,13 @@ module.exports = {
       {new: true}
     )
     res.status(200).json(user);
-  }
+  },
+
+async deleteUser(req,res){
+  console.log('delete user')
+  const user = await User.findOneAndDelete(
+    {username: req.params.username},
+  )
+  res.status(200).json(user);
+}
 };
