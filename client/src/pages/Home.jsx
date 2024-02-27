@@ -183,20 +183,17 @@ const Home = () => {
   };
 
   return (
-    <div>
+    <Container className=''>
       <Navbar expand="lg" className="bg-body-tertiary">
       <Container>
         <Navbar.Brand>Liar's Poker</Navbar.Brand>
-        <Navbar.Toggle aria-controls="basic-navbar-nav" />
-        <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
             <Button onClick={openModal}>How to Play</Button>
           </Nav>
-          </Navbar.Collapse>
           </Container>
           </Navbar>
 
-      <Container>
+        <Container className="justify-content-center align-items-center bg-white" style={{ height: '100vh' }}>
         <Row>
       <FloatingLabel
         // controlId="floatingInput"
@@ -251,10 +248,10 @@ const Home = () => {
                   cards and is incorrect they are out. This limit is 4 in games larger than 6.</p>
                 </Modal.Body>
                 <Modal.Footer>
-                <Button onClick={closeModal}>Close</Button>
+                <Button className='btn'onClick={closeModal}>Close</Button>
                 </Modal.Footer>
             </Modal>
-    </div>
+    </Container>
     
   );
 };

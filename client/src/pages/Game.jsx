@@ -9,7 +9,9 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
-
+import Nav from 'react-bootstrap/Nav';
+import Navbar from 'react-bootstrap/Navbar';
+import Form from 'react-bootstrap/Form';
 
 const Game = () =>{
 
@@ -32,6 +34,7 @@ const Game = () =>{
     const [allHands, setAllHands] = useState([]);
     const [passorFail, setPassorFail] = useState();
     const [handCalled, setHandCalled] = useState();
+    const [message, setMessage] = useState('');
     let code = window.location.toString().split('/')[
         window.location.toString().split('/').length-1
     ];
@@ -45,14 +48,27 @@ const Game = () =>{
         cards[cardsArr[i]]=1;
     }
     const [requestSent, setRequestSent]= useState(false);
-    window.addEventListener('beforeunload', function (event) {
+    window.addEventListener('beforeunload', async function(event) {
+        // if(!requestSent){
+        //     await deleteUser(cookies.sessionId)
+        //     setRequestSent(true)
+        // }
+        // return;
+        funcDelete()
+        });
+
+    const funcDelete = async () =>{
         if(!requestSent){
-            deleteUser(cookies.sessionId)
+            let res=await getUser(cookies.sessionId)
+            console.log(res.ok)
+            if(res.ok){
+            console.log('test')
+            await deleteUser(cookies.sessionId)
             setRequestSent(true)
+            }
         }
         return;
-    });
-
+    }
 
     useEffect (() =>{
         getPlayers()
@@ -150,8 +166,8 @@ const Game = () =>{
 
 
   useEffect(async() => {
-    // const ws = new WebSocket('wss://liars-poker.onrender.com/');
-    const ws = new WebSocket('ws://localhost:3001/') // Replace 'example.com/socket' with your server's WebSocket endpoint
+    const ws = new WebSocket('wss://liars-poker.onrender.com/');
+    // const ws = new WebSocket('ws://localhost:3001/') // Replace 'example.com/socket' with your server's WebSocket endpoint
 
     ws.onmessage = async (event) => {
         // console.log('messae')
@@ -239,24 +255,29 @@ const Game = () =>{
             console.log('check')
         if(selectedHand.num<currentHand.num){
             console.log('hand not high enoguh')
+            setMessage('Must select a higher hand')
             return;
         } else if(selectedHand.num===currentHand.num){
             if(suits.indexOf(hand[3])>suits.indexOf(suit) ){
                 console.log('higher suit needed')
+                setMessage('Must select a higher suit')
                 return;
             }
             if(suits.indexOf(hand[3])===suits.indexOf(suit) && selectedHand.name=='Flush'){
                 console.log('higher suit needed')
+                setMessage('Must select a higher suit')
                 return;
             }
             if(allCards.indexOf(hand[1])>=allCards.indexOf(card1) && suits.indexOf(hand[3])===suits.indexOf(suit) && selectedHand.name!=='Flush'){
                 console.log('select higher card')
+                setMessage('Must select a higher card')
                 return;
             }
         }
             if(selectedHand.name ==='Two Pair' || selectedHand.name === 'Full House'){
                 if(allCards.indexOf(card1)<=allCards.indexOf(card2)){
                     console.log('cards must not be the same or card 1 less than card 2')
+                    setMessage('Cards cannot be the same or tp card is less than bottom card')
                     return;
                 }
             }
@@ -264,17 +285,20 @@ const Game = () =>{
                 console.log(allCards.indexOf(card1)-allCards.indexOf(card2))
                 if(allCards.indexOf(card1)-allCards.indexOf(card2)!==4){
                     console.log('cards must be 5 apart')
+                    setMessage('Cards must be 5 apart')
                     return;
                 }
             }
         } else {
             if(hand[1]>=card1 && suits.indexOf(hand[3])===suits.indexOf(suit)){
                 console.log('select higher card')
+                setMessage('Must select a higher card')
                 return;
             }
             if(selectedHand.name ==='Two Pair' || selectedHand.name === 'Full House'){
                 if(allCards.indexOf(card1)==allCards.indexOf(card2)){
                     console.log('cards must not be the same')
+                    setMessage('Cards cannot be the same')
                     return;
                 }
             }
@@ -282,6 +306,7 @@ const Game = () =>{
                 console.log(allCards.indexOf(card1)-allCards.indexOf(card2))
                 if(allCards.indexOf(card1)-allCards.indexOf(card2)!==4){
                     console.log('cards must be 5 apart')
+                    setMessage('Cards must be 5 apart')
                     return;
                 }
             }
@@ -713,19 +738,16 @@ const Game = () =>{
         setRulesModal(false);
     };
     return (
-        <>
+        <Container className="justify-content-center align-items-center" style={{ height: '100vh' }}>
         <Navbar expand="lg" className="bg-body-tertiary">
       <Container>
         <Navbar.Brand>Liar's Poker</Navbar.Brand>
-        <Navbar.Toggle aria-controls="basic-navbar-nav" />
-        <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
             <Button onClick={openRules}>How to Play</Button>
           </Nav>
-          </Navbar.Collapse>
           </Container>
           </Navbar>
-          <Modal show={isModalOpen} onHide={closeModal} scrollable={true}>
+          <Modal show={rulesModal} onHide={closeRules} scrollable={true}>
                 <Modal.Header closeButton>
                     <Modal.Title>How to Play</Modal.Title>
                 </Modal.Header>
@@ -754,15 +776,15 @@ const Game = () =>{
                   cards and is incorrect they are out. This limit is 4 in games larger than 6.</p>
                 </Modal.Body>
                 <Modal.Footer>
-                <Button onClick={closeModal}>Close</Button>
+                <Button onClick={closeRules}>Close</Button>
                 </Modal.Footer>
             </Modal>
-        <Container>
+            <Container className="justify-content-center align-items-center" style={{ height: '100vh' }}>
         {winner ? (
-            <p>{winner} wins</p>
+            <h1>{winner} wins</h1>
         ) : (
         !started ? (
-            <>
+            <Container className="justify-content-center align-items-center bg-white" style={{ height: '100vh' }}>
             <h1>{code}</h1>
             <h2>Players</h2>
             <ul>
@@ -776,13 +798,13 @@ const Game = () =>{
             </ul>
             <Button type='submit' onClick={handleButtonClick}>Start Game</Button>
 
-            </>
+            </Container>
         ) : (
             <>
-            <div>started</div>
-            <p>{hand}</p>
+            {/* <div>started</div> */}
+            <p>Current Hand is {hand[0]} {hand[1]} {hand[2]} {hand[3]} </p>
             <ul>
-            
+            <p>Your Cards</p>
             {userHand.map((card) => (
               <li>{card}</li>
             ))}
@@ -794,7 +816,7 @@ const Game = () =>{
                     <Modal.Title>Previous Round</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>                
-                    <h2>{passorFail}</h2>
+                <h2>{passorFail}</h2>
                 <h3>{handCalled}</h3>
                 <ul>
                     {allHands.map((hand)=>(
@@ -810,12 +832,12 @@ const Game = () =>{
             <>
             {playerList[userTurn]===cookies.sessionId ? (
               <>
-            <p>your turn {userTurn}</p>
-            {hand[0] ? <button type='submit' onClick={handleBS}>Call B.S.</button> : null}
+            <p>Your Turn</p>
+            {hand[0] ? <Button type='submit' onClick={handleBS}>Call B.S.</Button> : null}
             <div className="card-body m-5">
-            <form onSubmit={handleFormSubmit}>
+            <Form onSubmit={handleFormSubmit}>
             <label>Possible Hands: </label>
-            <select name="hand" onChange={handleInputChange}>
+            <Form.Select name="hand" onChange={handleInputChange}>
                 {hands.map((hand) => {
                 return (
                     <option key={hand._id} value={hand.name}>
@@ -823,10 +845,11 @@ const Game = () =>{
                     </option>
                 );
                 })}
-            </select>
+            </Form.Select>
             {(selected==='High Card') ? (
                 <>
-                <select name="card1" >
+                <label>Top Card, Three of a Kind</label>
+                <Form.Select name="card1" >
                     {allCards.map((card) => {
                         return (
                             <option key={card._id} value={card}>
@@ -834,11 +857,12 @@ const Game = () =>{
                             </option>
                         );
                     })}
-                </select>
-                <select name="card2" value={undefined} disabled>
-                </select>
+                </Form.Select>
+                <label>Bottom Card, Pair</label>
+                <Form.Select name="card2" value={undefined} disabled>
+                </Form.Select>
                 <label>Suit </label>
-                <select name="suit" >
+                <Form.Select name="suit" >
                     {suits.map((suit) => {
                         return (
                             <option key={suit._id} value={suit}>
@@ -846,13 +870,14 @@ const Game = () =>{
                             </option>
                         );
                     })}
-                </select>
-                <button type='submit'>Submit</button>
+                </Form.Select>
+                <Button type='submit'>Submit</Button>
                 </>
             ) : undefined}
             {(selected==='Pair' || selected==='Three of a Kind'|| selected==='Four of a Kind') ? (
                 <>
-                <select name="card1" >
+                <label>Top Card, Three of a Kind</label>
+                <Form.Select name="card1" >
                     {allCards.map((card) => {
                         return (
                             <option key={card._id} value={card}>
@@ -860,19 +885,20 @@ const Game = () =>{
                             </option>
                         );
                     })}
-                </select>
-                <select name="card2" value={undefined} disabled>
-                </select>
+                </Form.Select>
+                <label>Bottom Card, Pair</label>
+                <Form.Select name="card2" value={undefined} disabled>
+                </Form.Select>
                 <label>Suit </label>
-                <select name="suit" value={undefined} disabled>
-                </select>
-                <button type='submit'>Submit</button>
+                <Form.Select name="suit" value={undefined} disabled>
+                </Form.Select>
+                <Button type='submit'>Submit</Button>
                 </>
             ) : undefined}
             {(selected === 'Two Pair' || selected === 'Full House' || selected ==='Straight') ? (
                 <>
                 <label>Top Card, Three of a Kind</label>
-                <select name="card1" >
+                <Form.Select name="card1" >
                     {allCards.map((card) => {
                         return (
                             <option key={card._id} value={card}>
@@ -880,9 +906,9 @@ const Game = () =>{
                             </option>
                         );
                     })}
-                </select>
+                </Form.Select>
                 <label>Bottom Card, Pair </label>
-                <select name="card2" >
+                <Form.Select name="card2" >
                     {allCards.map((card) => {
                         return (
                             <option key={card._id} value={card}>
@@ -890,20 +916,23 @@ const Game = () =>{
                             </option>
                     );
                 })}
-                </select>
-                <select name="suit" value={undefined} disabled>
-                </select>
-                <button type='submit'>Submit</button>
+                </Form.Select>
+                <label>Suit </label>
+                <Form.Select name="suit" value={undefined} disabled>
+                </Form.Select>
+                <Button type='submit'>Submit</Button>
                 </>
             ): undefined}
             {selected==='Flush' ?
             <>
-             <select name="card1" value={undefined} disabled>
-            </select>
-            <select name="card2" value={undefined} disabled>
-                </select>
+            <label>Top Card, Three of a Kind </label>
+             <Form.Select name="card1" value={undefined} disabled>
+            </Form.Select>
+            <label>Bottom Card, Pair </label>
+            <Form.Select name="card2" value={undefined} disabled>
+                </Form.Select>
             <label>Suit </label>
-            <select name="suit" >
+            <Form.Select name="suit" >
             {suits.map((suit) => {
                 return (
                     <option key={suit._id} value={suit}>
@@ -911,14 +940,14 @@ const Game = () =>{
                     </option>
                 );
                 })}
-            </select>
-            <button type='submit'>Submit</button>
+            </Form.Select>
+            <Button type='submit'>Submit</Button>
             </>
             : undefined}
             {selected ==='Straight Flush'|| selected==='Royal Flush' ?
             <>
             <label>Top Card </label>
-            <select name="card1" >
+            <Form.Select name="card1" >
                 {allCards.map((card) => {
                     return (
                         <option key={card._id} value={card}>
@@ -926,9 +955,9 @@ const Game = () =>{
                         </option>
                     );
                 })}
-            </select>
+            </Form.Select>
             <label>Bottom Card </label>
-            <select name="card2" >
+            <Form.Select name="card2" >
                 {allCards.map((card) => {
                     return (
                         <option key={card._id} value={card}>
@@ -936,9 +965,9 @@ const Game = () =>{
                         </option>
                 );
             })}
-            </select>
+            </Form.Select>
             <label>Suit </label>
-            <select name="suit" >
+            <Form.Select name="suit" >
             {suits.map((suit) => {
                 return (
                     <option key={suit._id} value={suit}>
@@ -946,22 +975,23 @@ const Game = () =>{
                     </option>
                 );
                 })}
-            </select>
-            <button type='submit'>Submit</button>
+            </Form.Select>
+            <Button type='submit'>Submit</Button>
             </>
         : undefined}
-            </form>
+            </Form>
+            <h2 style={{ color: 'red' }}>{message}</h2>
         </div>
         </>
             ) : (
-            <p>{playerList[userTurn]} turn</p>
+            <p>{playerList[userTurn]} Turn</p>
             )}
             </>
             </>
         ))
         }
         </Container>
-        </>
+        </Container>
         
     )
 

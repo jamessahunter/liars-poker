@@ -9,7 +9,7 @@ export const getAllUser = () => {
 };
 
 export const getUser = (username) => {
-  // console.log(code)
+  console.log(username)
   return fetch(`/api/user/${username}`, {
     method: 'GET',
     headers: {
