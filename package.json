@@ -16,10 +16,12 @@
     "concurrently": "^5.3.0"
   },
   "dependencies": {
+    "bootstrap": "^5.3.3",
     "buffer": "^6.0.3",
     "modal": "^1.2.0",
     "pusher": "^5.2.0",
     "pusher-js": "^8.4.0-rc2",
+    "react-bootstrap": "^2.10.1",
     "react-cookie": "^7.0.2",
     "react-modal": "^3.16.1",
     "react-router": "^6.21.2",
