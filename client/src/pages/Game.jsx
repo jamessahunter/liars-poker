@@ -738,15 +738,15 @@ const Game = () =>{
         setRulesModal(false);
     };
     return (
-        <Container className="justify-content-center align-items-center" style={{ height: '100vh' }}>
-        <Navbar expand="lg" className="bg-body-tertiary">
-      <Container>
-        <Navbar.Brand>Liar's Poker</Navbar.Brand>
-          <Nav className="me-auto">
+        <Container className="justify-content-center align-items-center rounded bg-white mb-3">
+          <Row className='justify-content-center align-items-center'>
+        <Col xs={6}>
+        <h1>Liar's Poker</h1>
+        </Col>
+        <Col xs={6} className='d-flex justify-content-end'>
             <Button onClick={openRules}>How to Play</Button>
-          </Nav>
-          </Container>
-          </Navbar>
+        </Col>
+      </Row>
           <Modal show={rulesModal} onHide={closeRules} scrollable={true}>
                 <Modal.Header closeButton>
                     <Modal.Title>How to Play</Modal.Title>
@@ -779,12 +779,12 @@ const Game = () =>{
                 <Button onClick={closeRules}>Close</Button>
                 </Modal.Footer>
             </Modal>
-            <Container className="justify-content-center align-items-center" style={{ height: '100vh' }}>
+            <Container className="justify-content-center align-items-center rounded mb-3" >
         {winner ? (
             <h1>{winner} wins</h1>
         ) : (
         !started ? (
-            <Container className="justify-content-center align-items-center bg-white" style={{ height: '100vh' }}>
+            <Container className="justify-content-center align-items-center bg-white text-center">
             <h1>{code}</h1>
             <h2>Players</h2>
             <ul>
@@ -796,21 +796,32 @@ const Game = () =>{
                 ))
                 )}
             </ul>
-            <Button type='submit' onClick={handleButtonClick}>Start Game</Button>
+            <Button type='submit' className="mb-3" onClick={handleButtonClick}>Start Game</Button>
 
             </Container>
         ) : (
             <>
-            {/* <div>started</div> */}
+            <Row className='d-flex justify-content-center'>
+            <Col className='d-flex justify-content-center'>
             <p>Current Hand is {hand[0]} {hand[1]} {hand[2]} {hand[3]} </p>
+            </Col>
+            </Row>
+            <Row>
+                <Col className='d-flex justify-content-center'>
             <ul>
-            <p>Your Cards</p>
+            <p>Your Cards are:</p>
             {userHand.map((card) => (
               <li>{card}</li>
             ))}
             </ul>
-            <Button onClick={handleClickCard} >Get Cards</Button>
+            </Col>
+            </Row>
+                <Row className='d-flex justify-content-center'>
+                    <Col className='d-flex justify-content-center' xs={3}>
+            {/* <Button onClick={handleClickCard} >Get Cards</Button> */}
             <Button onClick={openModal}>See Previous Rounds Cards</Button>
+                </Col>
+            </Row>
             <Modal show={isModalOpen} onHide={closeModal}>
                 <Modal.Header closeButton>
                     <Modal.Title>Previous Round</Modal.Title>
@@ -829,15 +840,19 @@ const Game = () =>{
                 </Modal.Footer>
             </Modal>
             
-            <>
+            <div className="mb-3">
             {playerList[userTurn]===cookies.sessionId ? (
               <>
-            <p>Your Turn</p>
+              <Row className='d-flex justify-content-center'>
+                <Col className='d-flex justify-content-center'>
+            <h2>Your Turn</h2>
+            </Col>
+            </Row>
             {hand[0] ? <Button type='submit' onClick={handleBS}>Call B.S.</Button> : null}
             <div className="card-body m-5">
-            <Form onSubmit={handleFormSubmit}>
+            <Form onSubmit={handleFormSubmit} className="mb-3">
             <label>Possible Hands: </label>
-            <Form.Select name="hand" onChange={handleInputChange}>
+            <Form.Select name="hand" onChange={handleInputChange} className="mb-3">
                 {hands.map((hand) => {
                 return (
                     <option key={hand._id} value={hand.name}>
@@ -976,7 +991,7 @@ const Game = () =>{
                 );
                 })}
             </Form.Select>
-            <Button type='submit'>Submit</Button>
+            <Button type='submit' className="mb-3" >Submit</Button>
             </>
         : undefined}
             </Form>
@@ -984,9 +999,13 @@ const Game = () =>{
         </div>
         </>
             ) : (
-            <p>{playerList[userTurn]} Turn</p>
+                <Row className='d-flex justify-content-center'>
+                    <Col className='d-flex justify-content-center'>
+            <h2>{playerList[userTurn]} Turn</h2>
+            </Col>
+            </Row>
             )}
-            </>
+            </div>
             </>
         ))
         }

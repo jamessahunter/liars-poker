@@ -183,18 +183,17 @@ const Home = () => {
   };
 
   return (
-    <Container className=''>
-      <Navbar expand="lg" className="bg-body-tertiary">
-      <Container>
-        <Navbar.Brand>Liar's Poker</Navbar.Brand>
-          <Nav className="me-auto">
+    <Container className='bg-white rounded align-items-center ' >
+      <Row className='justify-content-center align-items-center '>
+        <Col xs={6} className='justify-content-flex-end'>
+        <h1>Liar's Poker</h1>
+        </Col>
+        <Col xs={6} className='d-flex justify-content-end'>
             <Button onClick={openModal}>How to Play</Button>
-          </Nav>
-          </Container>
-          </Navbar>
-
-        <Container className="justify-content-center align-items-center bg-white" style={{ height: '100vh' }}>
-        <Row>
+        </Col>
+      </Row>
+        <Row className="justify-content-space-between align-items-center bg-white">
+          <Col >
       <FloatingLabel
         // controlId="floatingInput"
         label="Username"
@@ -202,23 +201,20 @@ const Home = () => {
       >
         <Form.Control as="input" placeholder="username" id='username' value={userFormData.username} onChange={handleInputChange}/>
       </FloatingLabel>
-      <FloatingLabel controlId="floatingPassword" label="Room Code">
+      <FloatingLabel controlId="floatingPassword" label="Room Code"         className="mb-3">
         <Form.Control as="input" placeholder="CODE" id='room' value={userFormData.room} onChange={handleInputChange}/>
       </FloatingLabel>
+      </Col>
       </Row>
-      <Row>
-
-      </Row>
-      <Row>
-        <Col>      
+      <Row className="justify-content-center mb-3">
+        <Col xs={3} className="text-center mb-3">   
         <Button type='submit'id='create' onClick={handleButtonClick}>Create a Game</Button>
         </Col>
-        <Col>
+        <Col xs={3} className="text-center">
       <Button type='submit'id='room' onClick={handleButtonClick}>Join a Game</Button>
       </Col>
       </Row>
       <h2 style={{ color: 'red' }}>{message}</h2>
-      </Container>
       <Modal show={isModalOpen} onHide={closeModal} scrollable={true}>
                 <Modal.Header closeButton>
                     <Modal.Title>How to Play</Modal.Title>

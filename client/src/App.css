@@ -15,3 +15,18 @@ body {
   background-color: red;
 
 }
+
+
+ul{ 
+  list-style-type: none;
+}
+
+.form-control:focus, textarea:focus {
+  outline: 2px solid red; /* Change 'blue' to the color you prefer */
+  border-color: black;
+  box-shadow: 0 0 0 0.2rem rgba(255, 0, 0, 0.25); 
+}
+
+.form-select{
+  margin-bottom: 3rem;
+}
