@@ -6,7 +6,7 @@ import Home from './pages/Home';
 // import Vote from './pages/Vote';
 import NotFound from './pages/NotFound';
 import Game from './pages/Game.jsx';
-import Lobby from './pages/Lobby.jsx';
+// import Lobby from './pages/Lobby.jsx';
 
 const router = createBrowserRouter([
   {
@@ -24,10 +24,7 @@ const router = createBrowserRouter([
       }, {
         path: '/game/:room',
         element: <Game />
-      }, {
-        path: '/lobby',
-        element: <Lobby />
-      },
+      }, 
     ],
   },
 ]);
