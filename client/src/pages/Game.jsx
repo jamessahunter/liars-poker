@@ -1,16 +1,12 @@
 import { useState, useEffect, React } from 'react';
-import { useParams, Link } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 import { getRoomUser, getUser, addCard, getUserTurn, updateTurn, addDealt, getDealt, addHand, getHand,
 addCount, resetCardsDealt, resetCardsPlayer, setPlayersIn, getIn, setRoomStarted, deleteUser } from '../utils/api';
-// import Modal from 'react-modal'
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
-import Nav from 'react-bootstrap/Nav';
-import Navbar from 'react-bootstrap/Navbar';
 import Form from 'react-bootstrap/Form';
 
 const Game = () =>{
@@ -48,22 +44,17 @@ const Game = () =>{
         cards[cardsArr[i]]=1;
     }
     const [requestSent, setRequestSent]= useState(false);
+    //deletes user from db once the user leaves
     window.addEventListener('beforeunload', async function(event) {
-        // if(!requestSent){
-        //     await deleteUser(cookies.sessionId)
-        //     setRequestSent(true)
-        // }
-        // return;
         funcDelete()
         });
 
     const funcDelete = async () =>{
         if(!requestSent){
             let res=await getUser(cookies.sessionId)
-            console.log(res.ok)
             if(res.ok){
-            console.log('test')
-            await deleteUser(cookies.sessionId)
+
+                await deleteUser(cookies.sessionId)
             setRequestSent(true)
             }
         }
@@ -74,89 +65,77 @@ const Game = () =>{
         getPlayers()
         },[players])
     useEffect(() => {
-        console.log("test")
         getHands();
     }, [userTurn]);
     useEffect(()=>{
-        console.log(started)
     },[started])
     useEffect(()=>{
-      // console.log('hands')
+
       getHands();
     },[])
+    //gets whose turn it is
     const getTurn = async () =>{
       try{
         let resTurn=await getUserTurn(code);
         let turn  = await resTurn.json();
-        console.log(turn)
         setUserTurn(turn);
       } catch(err){
           console.error(err)
       }
     }
-
+    //gets all the players
     const getPlayers = async () =>{
         try{
             let res=await getRoomUser(code);
             let players = await res.json();
-    //   console.log('test')
       if(players.length>6){
         setMaxCards(4);
       }else{
         setMaxCards(5);
       }
       setPlayers(players)
-
-
         } catch(err){
             console.error(err)
         }
-        // console.log("test")
+
     }
 
-
+    //starts the game
     const handleButtonClick = async (event) => {
         event.preventDefault();
         setStarted(true)
         setRoomStarted(code);
         await setPlayersIn(players,code)
         await dealCards();
-
-        // console.log(playersIn);
         const message = [code, 'started'];
-        // console.log(message)
         sendMessage(JSON.stringify(message));
     }
 
 
     const [socket, setSocket] = useState(null);
-
+    //deals the cards
     const dealCards= async() => {
         let res= await getIn(code);
         let playersIn = await res.json();
-        // console.log(playersIn)
+
         setPlayerList(playersIn)
         for(let i=0;i<playersIn.length;i++){
             let res = await getUser(playersIn[i])
             let user = await res.json()
             if(user.stillIn){
               setUserCount(user.card_count)
-                // setPlayersIn((prevPlayersIn) => [...prevPlayersIn, user.username]);
                 for(let i=0;i<user.card_count;i++){
                     let randomNumber = Math.floor(Math.random() * 52);
                     let res = await getDealt(code)
                     let dealt = await res.json();
-                    // console.log(dealt)
                     for(let i=0;i<dealt.length;i++){
                       cards[dealt]=0;
                     }
                     while(cards[cardsArr[randomNumber]]!==1){
                         randomNumber = Math.floor(Math.random() * 52);
                     }
-                    // console.log(cards[randomNumber])
                     addCard(user.username, cardsArr[randomNumber])
                     addDealt(code,cardsArr[randomNumber])
-
                     cards[cardsArr[randomNumber]]=0;
                 }
             }
@@ -164,17 +143,14 @@ const Game = () =>{
         }
     }
 
-
+//uses websockets to connect all users
   useEffect(async() => {
     const ws = new WebSocket('wss://liars-poker.onrender.com/');
     // const ws = new WebSocket('ws://localhost:3001/') // Replace 'example.com/socket' with your server's WebSocket endpoint
 
     ws.onmessage = async (event) => {
-        // console.log('messae')
       const message = event.data;
-    //   console.log(message)
       const parse=JSON.parse(message);
-      console.log('Received message:', parse);
         if(parse[0]===code){
             if(parse[1]==='started'){
                 setStarted(true);
@@ -186,17 +162,12 @@ const Game = () =>{
                 let resP = await getIn(code)
                 let playersIn = await resP.json()
                 setPlayerList(playersIn)
-                console.log(hand)
             } else if(parse[1]==='next user'){
-              // console.log(parse[2])
-              // console.log(playersIn.length)
               await getTurn();
               getHand(code)
               let res= await getHand(code)
               let result = await res.json();
               setHand(result)
-              console.log(result)
-              // console.log(hand)
               setSelected('None')
             } else if(parse[1]==='players'){
                 setPlayersIn(parse[2])
@@ -223,13 +194,12 @@ const Game = () =>{
 
   // Send messages to the server
   const sendMessage = (message) => {
-    // console.log('started')
     if (socket) {
       socket.send(message);
     }
   };
 
-
+  //checks that the hand played is a valid hand
     const handleFormSubmit = async (event) => {
         event.preventDefault();
         let card1=event.target.card1.value
@@ -239,73 +209,53 @@ const Game = () =>{
         let chosenHandNum = null;
           // Find the object in the hands array that matches the selected hand
         const selectedHand = hands.find(hand => hand.name === chosenHand);
-        // console.log(hand)
         const currentHand = hands.find(handname => handname.name === hand[0])
-        // console.log(currentHand);
         if (selectedHand) {
             chosenHandNum = selectedHand.num;
         }
-        // console.log(selectedHand);
-        // console.log(chosenHandNum);
-        // console.log(hand[1])
-        // console.log(card1);
-        // console.log((hand[1]>=card1))
-        // console.log(suits.indexOf(hand[3]))
         if(hand[0]){
-            console.log('check')
         if(selectedHand.num<currentHand.num){
-            console.log('hand not high enoguh')
             setMessage('Must select a higher hand')
             return;
         } else if(selectedHand.num===currentHand.num){
             if(suits.indexOf(hand[3])>suits.indexOf(suit) ){
-                console.log('higher suit needed')
                 setMessage('Must select a higher suit')
                 return;
             }
             if(suits.indexOf(hand[3])===suits.indexOf(suit) && selectedHand.name=='Flush'){
-                console.log('higher suit needed')
                 setMessage('Must select a higher suit')
                 return;
             }
             if(allCards.indexOf(hand[1])>=allCards.indexOf(card1) && suits.indexOf(hand[3])===suits.indexOf(suit) && selectedHand.name!=='Flush'){
-                console.log('select higher card')
                 setMessage('Must select a higher card')
                 return;
             }
         }
             if(selectedHand.name ==='Two Pair' || selectedHand.name === 'Full House'){
                 if(allCards.indexOf(card1)<=allCards.indexOf(card2)){
-                    console.log('cards must not be the same or card 1 less than card 2')
                     setMessage('Cards cannot be the same or tp card is less than bottom card')
                     return;
                 }
             }
             if(selectedHand.name === 'Straight' || selectedHand.name ==='Straight Flush'|| selectedHand.name==='Royal Flush'){
-                console.log(allCards.indexOf(card1)-allCards.indexOf(card2))
                 if(allCards.indexOf(card1)-allCards.indexOf(card2)!==4){
-                    console.log('cards must be 5 apart')
                     setMessage('Cards must be 5 apart')
                     return;
                 }
             }
         } else {
             if(hand[1]>=card1 && suits.indexOf(hand[3])===suits.indexOf(suit)){
-                console.log('select higher card')
                 setMessage('Must select a higher card')
                 return;
             }
             if(selectedHand.name ==='Two Pair' || selectedHand.name === 'Full House'){
                 if(allCards.indexOf(card1)==allCards.indexOf(card2)){
-                    console.log('cards must not be the same')
                     setMessage('Cards cannot be the same')
                     return;
                 }
             }
             if(selectedHand.name === 'Straight' || selectedHand.name ==='Straight Flush'|| selectedHand.name==='Royal Flush'){
-                console.log(allCards.indexOf(card1)-allCards.indexOf(card2))
                 if(allCards.indexOf(card1)-allCards.indexOf(card2)!==4){
-                    console.log('cards must be 5 apart')
                     setMessage('Cards must be 5 apart')
                     return;
                 }
@@ -313,41 +263,28 @@ const Game = () =>{
         }
         await addHand(code,selectedHand.name,card1,card2,suit)
         if(userTurn+1>=playerList.length){
-          // console.log('reset')
           await updateTurn(0,code);
         } else {
-          // console.log('+1')
           await updateTurn(userTurn+1,code);
         }
           await getTurn();
           const message = [code, 'next user',userTurn];
           sendMessage(JSON.stringify(message));
     };
-    const handleInputChange = (event) => {
-        // console.log(event.target.value)
-        // const { name, value } = event.target;
-        setSelected(event.target.value);
-        // console.log(hand)
-      };
 
+    const handleInputChange = (event) => {
+        setSelected(event.target.value);
+      };
+      //gets the hand
       const getHands = async()=>{
         let handRes= await getUser(cookies.sessionId);
         let result= await handRes.json()
         setUserHand(result.cards);
-        console.log(userHand) 
       }
-
-      const handleClickCard = ()=>{
-        getHands()
-      }
-
-      
-
+      //checks if the hand played exists
       const handleBS = async ()=>{
-        console.log('BS')
         let res = await getDealt(code)
         let dealt = await res.json();
-        // console.log(dealt)
         switch(hand[0]){
             case 'High Card':
                 checkHigh(dealt)
@@ -383,25 +320,19 @@ const Game = () =>{
       }
 
       const checkHigh = async (dealt) => {
-        console.log(hand[1])
         for(let i=0;i<dealt.length;i++){
             if(dealt[i].length===3){
                 if(dealt[i][0]===hand[1][0] && dealt[i][1]===hand[1][1] && dealt[i][2]===hand[3][0]){
-                    console.log('pass')
                     await addtoCount('pass')
-
                     return
                 }
             }else{
                 if(dealt[i][0]===hand[1][0] && dealt[i][1]===hand[3][0]){
-                    console.log('pass')
                     await addtoCount('pass')
-
                     return
                 }
             }
       }
-      console.log('fail')
       await addtoCount('fail')
     }
     const checkMulti = async (dealt,handCheck) => {
@@ -425,115 +356,91 @@ const Game = () =>{
             if(hand[1]===10){
                 if(obj[hand[1][1]]>=2){
                     await addtoCount('pass')
-                    console.log('pass')
                 } else {
-                    console.log('fail')
                     await addtoCount('fail')
                 }
             } else{
                 if(obj[hand[1][0]]>=2){
-                console.log('pass')
                 } else {
-                    console.log('fail')
                     await addtoCount('fail')
                 }
             }
         } else if(handCheck==='Two'){
             if(hand[1]===10){
                 if(obj[hand[1][1]]>=2 && obj[hand[2][0]]>=2){
-                    console.log('pass')
                     await addtoCount('pass')
 
                 } else {
-                    console.log('fail')
-                    await ddtoCount('fail')
+                    await addtoCount('fail')
                 }
             }else if(hand[2]===10){
                 if(obj[hand[1][0]]>=2 && obj[hand[2][1]]>=2){
-                    console.log('pass')
                     await addtoCount('pass')
 
                 } else {
-                    console.log('fail')
                     await addtoCount('fail')
                 }
             }  
             else{
                 if(obj[hand[1][0]]>=2 && obj[hand[2][0]]>=2){
-                console.log('pass')
                 await addtoCount('pass')
 
                 } else {
-                    console.log('fail')
                     await addtoCount('fail')
                 }
             }
         } else if(handCheck==='Three'){
             if(hand[1]===10){
                 if(obj[hand[1][1]]>=3){
-                    console.log('pass')
                     await addtoCount('pass')
 
                 } else {
-                    console.log('fail')
                     await addtoCount('fail')
                 }
             } else{
                 if(obj[hand[1][0]]>=3){
-                console.log('pass')
                 await addtoCount('pass')
 
                 } else {
-                    console.log('fail')
                     await addtoCount('fail')
                 }
             }
         } else if(handCheck==='Full'){
             if(hand[1]===10){
                 if(obj[hand[1][1]]>=3 && obj[hand[2][0]]>=2){
-                    console.log('pass')
                     await addtoCount('pass')
 
                 } else {
-                    console.log('fail')
                     await addtoCount('fail')
                 }
             }else if(hand[2]===10){
                 if(obj[hand[1][0]]>=3 && obj[hand[2][1]]>=2){
-                    console.log('pass')
                     await addtoCount('pass')
 
                 } else {
-                    console.log('fail')
                     await addtoCount('fail')
                 }
             } else{
                 if(obj[hand[1][0]]>=3 && obj[hand[2][0]]>=2){
-                console.log('pass')
                 await addtoCount('pass')
 
                 } else {
-                    console.log('fail')
                     await addtoCount('fail')
                 }
             }
         }else {
             if(hand[1]===10){
                 if(obj[hand[1][1]]>=4){
-                    console.log('pass')
                     await addtoCount('pass')
 
                 } else {
-                    console.log('fail')
                     await addtoCount('fail')
                 }
             } else{
                 if(obj[hand[1][0]]>=4){
-                console.log('pass')
                 await addtoCount('pass')
 
                 } else {
-                    console.log('fail')
                     await addtoCount('fail')
                 }
             }
@@ -557,11 +464,9 @@ const Game = () =>{
             }
         }
         if(obj[hand[3][0]]>=5){
-            console.log('pass')
             await addtoCount('pass')
 
         } else {
-            console.log('fail')
             await addtoCount('fail')
         }
       }
@@ -583,22 +488,18 @@ const Game = () =>{
             }
         }
         for(let i=allCards.indexOf(hand[2])+2;i<=allCards.indexOf(hand[1])+2;i++){
-            console.log(i)
             if(i===10){
                 if(!obj[0]){
-                    console.log('fail')
                     await addtoCount('fail')
                     return;
                 }
             } else {
                 if(!obj[allCards[i]]){
-                    console.log('fail')
                     await addtoCount('fail')
                     return;
                 }
             }
         }
-        console.log("pass")
         await addtoCount('pass')
 
       }
@@ -608,35 +509,26 @@ const Game = () =>{
         for(let i=0;i<dealt.length;i++){
              obj[dealt[i]]=1
         }
-        console.log(obj)
         for(let i=allCards.indexOf(hand[2]);i<=allCards.indexOf(hand[1]);i++){
-            console.log(allCards[i]+hand[3][0])
             if(!obj[allCards[i]+hand[3][0]]){
-                console.log('fail')
                 await addtoCount('fail')
                 return
             }
         }
-        console.log('pass')
         await addtoCount('fail')
 
     }
 
-
+    //adds to player count
     const addtoCount= async (ans) => {
         let res= await getIn(code);
         let playersIn = await res.json();
         let one=false;
-        // let turn;
         if(ans==='pass'){
             let res= await addCount(playersIn[userTurn],maxCards);
             let resjson = await res.json();
-            console.log(resjson)
-            // turn=userTurn;
             if(resjson==='remove'){
-                // console.log('test remover')
                 let result=playersIn.filter(player => player !== playersIn[userTurn])
-                console.log(result)
                 if(result.length===1){
                     one=true;
                 }
@@ -644,15 +536,11 @@ const Game = () =>{
             }
         } else {
             if(userTurn===0){
-                console.log(playersIn[playersIn.length-1])
                 let res= await addCount(playersIn[playersIn.length-1],maxCards);
                 let resjson = await res.json();
-                console.log(resjson)
                 await updateTurn(playersIn[playersIn.length-1],code)
                 if(resjson==='remove'){
-                    // console.log('tes t remove ')
                     let result = playersIn.filter(player => player !== playersIn[playersIn.length-1])
-                    console.log(result)
                     if(result.length===1){
                         one=true;
                     }
@@ -661,12 +549,9 @@ const Game = () =>{
             } else {
                 let res= await addCount(playersIn[userTurn-1],maxCards);
                 let resjson = await res.json();
-                console.log(resjson)
                 updateTurn(userTurn-1,code)
                 if(resjson==='remove'){
-                    // console.log('test remove')
                     let result = playersIn.filter(player => player !== playersIn[userTurn-1])
-                    console.log(result)
                     if(result.length===1){
                         one=true;
                     }
@@ -677,7 +562,6 @@ const Game = () =>{
 
         res= await getIn(code);
         playersIn = await res.json();
-        console.log(playersIn)
         setPlayerList(playersIn);
         let hands= await userCards()
         if(one){
@@ -709,10 +593,7 @@ const Game = () =>{
         for(let i=0;i<playersIn.length;i++){
             await resetCardsPlayer(playersIn[i]);
         }
-
         await dealCards();
-        // const message = [code,'round over'];
-        // sendMessage(JSON.stringify(message))
         await getHands();
         await getTurn();
          res= await getHand(code)
@@ -991,7 +872,11 @@ const Game = () =>{
                 );
                 })}
             </Form.Select>
+            <Row className='d-flex justify-content-center'>
+                    <Col className='d-flex justify-content-center' xs={3}>
             <Button type='submit' className="mb-3" >Submit</Button>
+            </Col>
+            </Row>
             </>
         : undefined}
             </Form>

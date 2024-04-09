@@ -11,8 +11,7 @@ module.exports = {
   },
 
   async addCard(req, res) {
-    console.log("add card")
-    console.log(req.body.card)
+
     const user = await User.findOneAndUpdate(
       {username: req.params.username},
       {$addToSet : {cards : req.body.card}},
@@ -22,12 +21,12 @@ module.exports = {
     },
 
     async addCount(req, res) {
-      console.log("add count")
+
       const user = await User.findOneAndUpdate(
         {username: req.params.username},
         {$inc : {card_count: 1}},
         { new: true })
-        // console.log(user)
+
       if(user.card_count>req.body.maxCards){
         await User.findOneAndUpdate(
           {username: req.params.username},
@@ -49,7 +48,7 @@ module.exports = {
   },
 
   async createUser({body},res){
-    console.log('user')
+
     const user=await User.create(body)
     if(!user){
       return res.status(400).json({ message: 'Unable make user' });
@@ -59,7 +58,7 @@ module.exports = {
   },
 
   async resetCardsPlayer(req,res){
-    console.log('reset player cards')
+
     const user = await User.findOneAndUpdate(
       {username: req.params.username},
       {$set : {cards: []}},
@@ -69,7 +68,7 @@ module.exports = {
   },
 
 async deleteUser(req,res){
-  console.log('delete user')
+
   const user = await User.findOneAndDelete(
     {username: req.params.username},
   )

@@ -28,9 +28,8 @@ const Home = () => {
   // Check which button was clicked
   if (buttonId === 'create') {
     // Create a game logic
-    console.log(userFormData.username)
     if(userFormData.username===""){
-      // console.log("test")
+
       setMessage("Please enter a username")
       return
     }
@@ -40,11 +39,10 @@ const Home = () => {
         throw new Error('Cant get users')
       }
       const users = await res.json();
-      // console.log(users)
+
       for(let i=0;i<users.length;i++){
         if(users[i].username===userFormData.username){
           setMessage("This username is already being used in this room please select another")
-          // alert("This username is already being used in this room please select another")
           taken=true;
           return;
         }
@@ -52,7 +50,7 @@ const Home = () => {
     }catch(err){
       console.error(err)
     }
-    console.log(taken)
+    //checks that username isnt take
     if(!taken){
     try {
       const res = await createUser(userFormData.username)
@@ -64,6 +62,7 @@ const Home = () => {
         console.error(err);
       }
     setCookie('sessionId', `${userFormData.username}`, { path: '/' });
+    //creates a random room
     for(let i=0;i<4;i++){
     let randomIndex = Math.floor(Math.random() * 26);
     // Convert the random number to a letter
@@ -79,6 +78,7 @@ const Home = () => {
     catch (err) {
       console.error(err);
     }
+    //adds the user to room
     try {
       const res = await addUser(userFormData.username,roomCode)
       if(!res.ok){
@@ -88,28 +88,26 @@ const Home = () => {
     catch (err) {
       console.error(err);
     }
-    console.log('Create a game');
-    console.log(cookies.sessionId);
     navigate(`/Game/${roomCode}`);
   }
 }
    else if (buttonId === 'room') {
     // Join a game logic
     if(userFormData.username===""){
-      // console.log("test")
+
       setMessage("Please enter a username")
       return
     } else if(userFormData.room===""){
-      // console.log("test")
+
       setMessage("Please enter a room code or click create a game")
       return
     }
     try {
-
+      //checks that the room exists
       let res = await getRoomStarted(userFormData.room.toUpperCase())
-      console.log(res)
+
       let ans = await res.json()
-      console.log(ans)
+
       if(!res.ok){
         setMessage(`That room doesn't exist`)
         throw new Error('Cant get users')
@@ -117,16 +115,19 @@ const Home = () => {
         setMessage('This game has already started')
         return;
       }
-
+      //checks for unique username
       res = await getAllUser(userFormData.room.toUpperCase())
       if(!res.ok){
         throw new Error('Cant get users')
       }
       const users = await res.json();
-      console.log(users)
+      if(users.length>=8){
+        setMessage("This room is full. Click Create a game to make an empty one.")
+        return;
+      }
+
       for(let i=0;i<users.length;i++){
         if(users[i].username===userFormData.username){
-          // alert("This username is already being used in this room please select another")
           setMessage("This username is already being used please select another")
           taken=true;
           return;
@@ -159,10 +160,10 @@ const Home = () => {
     catch (err) {
       console.error(err);
     }
-    console.log('Join a game');
 
   }
   }
+
   const handleInputChange = (event) => {
     const { id, value } = event.target;
     setUserFormData({ ...userFormData, [id]: value });
@@ -172,7 +173,6 @@ const Home = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const openModal = () => {
-    console.log('clck')
       setIsModalOpen(true);
   };
 
@@ -193,7 +193,6 @@ const Home = () => {
         <Row className="justify-content-space-between align-items-center bg-white">
           <Col >
       <FloatingLabel
-        // controlId="floatingInput"
         label="Username"
         className="mb-3"
       >
@@ -251,11 +250,3 @@ const Home = () => {
 };
 
 export default Home;
-
-
-      {/* <form>
-      <label>Username</label>
-      <input id='username' value={userFormData.username} onChange={handleInputChange}></input>
-      <label>Room ID</label>
-      <input id='room'value={userFormData.room} onChange={handleInputChange}></input>
-      </form> */}

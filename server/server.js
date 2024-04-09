@@ -7,7 +7,6 @@ const connectDB = require('./config/connection');
 const routes = require('./routes');
 
 const PORT = process.env.PORT || 3001;
-const PORT2 =process.env.PORT2 || 8080;
 connectDB();
 const app = express();
 // const server = require('http').Server(app);
@@ -44,11 +43,8 @@ wss.on('connection', (ws) => {
     // const receivedData = JSON.parse(message.data);
     const messageString = message.toString('utf8');
     const parse = JSON.parse(messageString);
-    // console.log(parse)
-    console.log('Received message:', messageString);
-    // console.log(parse[1]);
     if(parse[1]==='started'){
-      // console.log("test")
+
     // Process the received message and send a response if needed
     clients.forEach((client) => {
       client.send(messageString);

@@ -1,5 +1,5 @@
 export const getAllUser = () => {
-  // console.log(code)
+
   return fetch(`/api/user`, {
     method: 'GET',
     headers: {
@@ -9,7 +9,7 @@ export const getAllUser = () => {
 };
 
 export const getUser = (username) => {
-  console.log(username)
+
   return fetch(`/api/user/${username}`, {
     method: 'GET',
     headers: {
@@ -19,7 +19,7 @@ export const getUser = (username) => {
 };
 
 export const getDealt = (code) => {
-  // console.log(code)
+
   return fetch(`/api/room/dealt/${code}`, {
     method: 'GET',
     headers: {
@@ -29,7 +29,7 @@ export const getDealt = (code) => {
 };
 
 export const addCard = (username, card) => {
-  // console.log(card)
+
   return fetch(`/api/user/card/${username}`, {
     method: 'PUT',
     headers: {
@@ -40,7 +40,7 @@ export const addCard = (username, card) => {
 }
 
 export const addCount = (username,maxCards) => {
-  console.log('add count')
+
   return fetch(`/api/user/count/${username}`, {
     method: 'PUT',
     headers: {
@@ -51,8 +51,7 @@ export const addCount = (username,maxCards) => {
 }
 
 export const addDealt = (room, card) => {
-  // console.log("dealt")
-  // console.log(card)
+
   return fetch(`/api/room/dealt/${room}`, {
     method: 'PUT',
     headers: {
@@ -63,8 +62,7 @@ export const addDealt = (room, card) => {
 }
 
 export const resetCardsDealt = (room, card) => {
-  // console.log("dealt")
-  // console.log(card)
+
   return fetch(`/api/room/reset/${room}`, {
     method: 'PUT',
     headers: {
@@ -83,7 +81,7 @@ export const resetCardsPlayer = (username) => {
 }
 
 export const addHand = (room, hand, card1, card2, suit) => {
-  // console.log("hand")
+
     const data = [hand, card1, card2, suit]
   return fetch(`/api/room/hand/${room}`, {
     method: 'PUT',
@@ -95,7 +93,7 @@ export const addHand = (room, hand, card1, card2, suit) => {
 }
 
 export const getHand = (code) => {
-  // console.log(code)
+
   return fetch(`/api/room/hand/${code}`, {
     method: 'GET',
     headers: {
@@ -105,8 +103,7 @@ export const getHand = (code) => {
 };
 
 export const createUser = (username) => {
-  console.log(username)
-  console.log(JSON.stringify(username))
+
   return fetch(`/api/user`,{
     method: 'POST',
     headers: {
@@ -117,8 +114,7 @@ export const createUser = (username) => {
 }
 
 export const createRoom = (code) => {
-  // console.log(username)
-  // console.log(JSON.stringify(username))
+
   return fetch(`/api/room`,{
     method: 'POST',
     headers: {
@@ -149,7 +145,7 @@ export const addUser = (username,code) => {
 }
 
 export const getRoomUser = (code) => {
-  // console.log(code)
+
   return fetch(`/api/room/user/${code}`, {
     method: 'GET',
     headers: {
@@ -159,7 +155,7 @@ export const getRoomUser = (code) => {
 };
 
   export const getUserTurn = (code) => {
-    console.log('turn')
+
     return fetch(`/api/room/turn/${code}`, {
       method: 'GET',
       headers: {
@@ -169,7 +165,7 @@ export const getRoomUser = (code) => {
 };
 
 export const updateTurn = (turn,code) => {
-  console.log(turn);
+
   return fetch(`/api/room/turn/${code}`,{
     method: 'PUT',
     headers: {
@@ -180,9 +176,9 @@ export const updateTurn = (turn,code) => {
 }
 
 export const setPlayersIn = (playersIn,code) => {
-  // console.log("players")
+
     const data = playersIn;
-    // console.log(data)
+
   return fetch(`/api/room/playersIn/${code}`, {
     method: 'PUT',
     headers: {
@@ -193,8 +189,7 @@ export const setPlayersIn = (playersIn,code) => {
 }
 
 export const getIn = (code) => {
-  // console.log("get players in")
-    // console.log(code)
+
   return fetch(`/api/room/getIn/${code}`, {
     method: 'GET',
     headers: {
@@ -209,7 +204,7 @@ export const setRoomStarted = (code) => {
     headers: {
       'Content-Type': 'application/json',
     },
-    // body: `{"started" : true}`,
+
   })
 }
 
